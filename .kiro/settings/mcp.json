@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+      "git": {
+        "command": "docker",
+        "args": [
+          "run",
+          "--rm",
+          "-i",
+          "--mount", "type=bind,src=/Users/richardgoshen/workspaces/java_workspace/module5_skel_student,dst=/workspace",
+          "mcp/git"
+        ]
+      }
+  }
+}
