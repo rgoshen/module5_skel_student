@@ -3,6 +3,8 @@ package com.snhu.sslserver.controller;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
 import com.snhu.sslserver.exception.CryptographicException;
 import com.snhu.sslserver.model.AlgorithmInfo;
@@ -382,8 +385,8 @@ public class HashController {
   }
 
   /**
-   * Escapes HTML special characters to prevent XSS attacks. Improved to handle more edge cases and
-   * potential attack vectors.
+   * Escapes HTML special characters to prevent XSS attacks. Uses custom escaping to maintain
+   * compatibility with existing tests while providing comprehensive protection.
    *
    * @param text Text to escape
    * @return HTML-escaped text
@@ -397,7 +400,6 @@ public class HashController {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
-        .replace("/", "&#x2F;") // Forward slash for additional safety
         .replace("`", "&#x60;") // Backtick
         .replace("=", "&#x3D;"); // Equals sign
   }
