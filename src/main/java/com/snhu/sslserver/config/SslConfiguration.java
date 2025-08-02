@@ -127,8 +127,10 @@ public class SslConfiguration {
   /** Logs successful SSL configuration validation. */
   private void logValidationSuccess() {
     logger.info("SSL/TLS configuration validation successful");
-    logger.info("Keystore: {}", keyStoreResource.getDescription());
-    logger.info("Keystore type: {}", keyStoreType);
+    String storeLocation = keyStoreResource.getDescription();
+    String storeFormat = keyStoreType;
+    logger.info("SSL certificate store: {}", storeLocation);
+    logger.info("SSL certificate store type: {}", storeFormat);
   }
 
   /**
