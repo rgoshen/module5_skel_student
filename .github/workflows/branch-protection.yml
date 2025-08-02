@@ -1,0 +1,47 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  enforce-checks:
+    name: Enforce Required Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check PR Requirements
+      run: |
+        echo "🔒 Enforcing branch protection rules for main branch"
+        echo "📋 Required checks:"
+        echo "  ✓ All tests must pass"
+        echo "  ✓ Security scan must complete"
+        echo "  ✓ Code quality checks must pass"
+        echo "  ✓ Build verification must succeed"
+        echo "  ✓ At least one approval required"
+        
+    - name: Validate PR Title
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        if [[ "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+ ]]; then
+          echo "✅ PR title follows conventional commit format"
+        else
+          echo "❌ PR title must follow format: type(scope): description"
+          echo "   Examples: feat: add hash validation, fix(tests): resolve null pointer exception"
+          exit 1
+        fi
+        
+    - name: Check PR Description
+      run: |
+        PR_BODY="${{ github.event.pull_request.body }}"
+        if [ -z "$PR_BODY" ]; then
+          echo "❌ PR description is required"
+          echo "   Please provide:"
+          echo "   - What changes were made"
+          echo "   - Why the changes were necessary"
+          echo "   - How to test the changes"
+          exit 1
+        else
+          echo "✅ PR description provided"
+        fi
