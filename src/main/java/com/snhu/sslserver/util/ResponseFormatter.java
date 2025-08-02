@@ -28,6 +28,19 @@ import com.snhu.sslserver.model.HashResult;
 @Component
 public class ResponseFormatter {
 
+  // HTML constants to reduce duplication
+  private static final String FIELD_DIV_START = "                <div class=\"field\">\n";
+  private static final String FIELD_DIV_END = "                </div>\n";
+  private static final String FIELD_VALUE_DIV_END = "</div>\n";
+  private static final String CONTAINER_DIV_END = "            </div>\n";
+  private static final String FIELD_LABEL_TEMPLATE =
+      "                    <label class=\"field-label\">%s:</label>\n";
+  private static final String FIELD_VALUE_START = "                    <div class=\"field-value";
+
+  // Common HTML page structure
+  private static final String SYSTEM_TITLE = "🔐 Checksum Verification System";
+  private static final String SYSTEM_SUBTITLE = "Cryptographic Hash Generation for File Integrity";
+
   /**
    * Generates a professionally formatted HTML response for hash computation results.
    *
@@ -41,64 +54,27 @@ public class ResponseFormatter {
     appendHashResultStyles(html);
     appendHtmlBodyStart(html);
 
-    html.append("    <div class=\"container\">\n");
-    html.append("        <header class=\"page-header\">\n");
-    html.append("            <h1>🔐 Checksum Verification System</h1>\n");
-    html.append(
-        "            <p class=\"subtitle\">Cryptographic Hash Generation for File Integrity</p>\n");
-    html.append("        </header>\n\n");
+    appendPageHeader(html, SYSTEM_TITLE, SYSTEM_SUBTITLE);
 
     html.append("        <main class=\"result-section\">\n");
     html.append("            <h2>Computation Result</h2>\n");
     html.append("            <div class=\"result-container\">\n");
 
-    // Original Data Field
-    html.append("                <div class=\"field\">\n");
-    html.append("                    <label class=\"field-label\">Original Data:</label>\n");
-    html.append("                    <div class=\"field-value\">");
-    html.append(escapeHtml(result.getOriginalData()));
-    html.append("</div>\n");
-    html.append("                </div>\n");
+    // Generate hash result fields
+    appendHashResultField(html, "Original Data", result.getOriginalData(), "");
+    appendHashResultField(html, "Algorithm", result.getAlgorithm(), " algorithm-badge");
+    appendHashResultField(html, "Hash Value", result.getHexHash(), " hash-value");
+    appendHashResultField(
+        html, "Computation Time", result.getComputationTimeMs() + " ms", " performance");
 
-    // Algorithm Field
-    html.append("                <div class=\"field\">\n");
-    html.append("                    <label class=\"field-label\">Algorithm:</label>\n");
-    html.append("                    <div class=\"field-value algorithm-badge\">");
-    html.append(escapeHtml(result.getAlgorithm()));
-    html.append("</div>\n");
-    html.append("                </div>\n");
-
-    // Hash Value Field
-    html.append("                <div class=\"field\">\n");
-    html.append("                    <label class=\"field-label\">Hash Value:</label>\n");
-    html.append("                    <div class=\"field-value hash-value\">");
-    html.append(escapeHtml(result.getHexHash()));
-    html.append("</div>\n");
-    html.append("                </div>\n");
-
-    // Computation Time Field
-    html.append("                <div class=\"field\">\n");
-    html.append("                    <label class=\"field-label\">Computation Time:</label>\n");
-    html.append("                    <div class=\"field-value performance\">");
-    html.append(result.getComputationTimeMs());
-    html.append(" ms</div>\n");
-    html.append("                </div>\n");
-
-    // Timestamp Field
     if (result.getTimestamp() != null) {
-      html.append("                <div class=\"field\">\n");
-      html.append("                    <label class=\"field-label\">Generated:</label>\n");
-      html.append("                    <div class=\"field-value timestamp\">");
-      html.append(escapeHtml(result.getTimestamp().toString()));
-      html.append("</div>\n");
-      html.append("                </div>\n");
+      appendHashResultField(html, "Generated", result.getTimestamp().toString(), " timestamp");
     }
 
-    html.append("            </div>\n");
+    html.append(CONTAINER_DIV_END);
     html.append("        </main>\n\n");
 
-    appendFooter(html);
-    html.append("    </div>\n");
+    appendPageFooter(html);
 
     appendHtmlBodyEnd(html);
     return html.toString();
@@ -117,62 +93,109 @@ public class ResponseFormatter {
     appendAlgorithmListStyles(html);
     appendHtmlBodyStart(html);
 
-    html.append("    <div class=\"container\">\n");
-    html.append("        <header class=\"page-header\">\n");
-    html.append("            <h1>🔧 Supported Hash Algorithms</h1>\n");
-    html.append(
-        "            <p class=\"subtitle\">Cryptographically Secure Algorithms Available</p>\n");
-    html.append("        </header>\n\n");
+    appendPageHeader(
+        html, "🔧 Supported Hash Algorithms", "Cryptographically Secure Algorithms Available");
 
     html.append("        <main class=\"algorithms-section\">\n");
     html.append("            <div class=\"algorithms-grid\">\n");
 
     for (AlgorithmInfo algorithm : algorithms) {
-      html.append("                <div class=\"algorithm-card ");
-      html.append(algorithm.isSecure() ? "secure" : "insecure");
-      html.append("\">\n");
-
-      html.append("                    <div class=\"algorithm-header\">\n");
-      html.append("                        <h3 class=\"algorithm-name\">");
-      html.append(escapeHtml(algorithm.getName()));
-      html.append("</h3>\n");
-
-      html.append("                        <span class=\"security-badge ");
-      html.append(algorithm.isSecure() ? "secure" : "insecure");
-      html.append("\">");
-      html.append(algorithm.isSecure() ? "✅ Secure" : "⚠️ Deprecated");
-      html.append("</span>\n");
-      html.append("                    </div>\n");
-
-      if (algorithm.getDescription() != null && !algorithm.getDescription().isEmpty()) {
-        html.append("                    <p class=\"algorithm-description\">");
-        html.append(escapeHtml(algorithm.getDescription()));
-        html.append("</p>\n");
-      }
-
-      html.append("                    <div class=\"algorithm-details\">\n");
-      if (algorithm.getPerformance() != null) {
-        html.append("                        <div class=\"performance-info\">\n");
-        html.append(
-            "                            <span class=\"detail-label\">Performance:</span>\n");
-        html.append("                            <span class=\"performance-rating\">");
-        html.append(escapeHtml(algorithm.getPerformance().toString()));
-        html.append("</span>\n");
-        html.append("                        </div>\n");
-      }
-      html.append("                    </div>\n");
-
-      html.append("                </div>\n");
+      appendAlgorithmCard(html, algorithm);
     }
 
-    html.append("            </div>\n");
+    html.append(CONTAINER_DIV_END);
     html.append("        </main>\n\n");
 
-    appendFooter(html);
-    html.append("    </div>\n");
+    appendPageFooter(html);
 
     appendHtmlBodyEnd(html);
     return html.toString();
+  }
+
+  /**
+   * Appends a common page header with title and subtitle.
+   *
+   * @param html StringBuilder to append content to
+   * @param title Main page title
+   * @param subtitle Page subtitle
+   */
+  private void appendPageHeader(StringBuilder html, String title, String subtitle) {
+    html.append("    <div class=\"container\">\n");
+    html.append("        <header class=\"page-header\">\n");
+    html.append("            <h1>").append(title).append("</h1>\n");
+    html.append("            <p class=\"subtitle\">").append(subtitle).append("</p>\n");
+    html.append("        </header>\n\n");
+  }
+
+  /**
+   * Appends a common page footer.
+   *
+   * @param html StringBuilder to append content to
+   */
+  private void appendPageFooter(StringBuilder html) {
+    appendFooter(html);
+    html.append("    </div>\n");
+  }
+
+  /**
+   * Appends a hash result field with label and value.
+   *
+   * @param html StringBuilder to append content to
+   * @param label Field label
+   * @param value Field value
+   * @param cssClass Additional CSS class for the field value
+   */
+  private void appendHashResultField(
+      StringBuilder html, String label, String value, String cssClass) {
+    html.append(FIELD_DIV_START);
+    html.append(String.format(FIELD_LABEL_TEMPLATE, label));
+    html.append(FIELD_VALUE_START).append(cssClass).append("\">");
+    html.append(escapeHtml(value));
+    html.append(FIELD_VALUE_DIV_END);
+    html.append(FIELD_DIV_END);
+  }
+
+  /**
+   * Appends an algorithm card to the algorithms grid.
+   *
+   * @param html StringBuilder to append content to
+   * @param algorithm Algorithm information
+   */
+  private void appendAlgorithmCard(StringBuilder html, AlgorithmInfo algorithm) {
+    String securityClass = algorithm.isSecure() ? "secure" : "insecure";
+    String securityBadge = algorithm.isSecure() ? "✅ Secure" : "⚠️ Deprecated";
+
+    html.append("                <div class=\"algorithm-card ")
+        .append(securityClass)
+        .append("\">\n");
+    html.append("                    <div class=\"algorithm-header\">\n");
+    html.append("                        <h3 class=\"algorithm-name\">")
+        .append(escapeHtml(algorithm.getName()))
+        .append("</h3>\n");
+    html.append("                        <span class=\"security-badge ")
+        .append(securityClass)
+        .append("\">")
+        .append(securityBadge)
+        .append("</span>\n");
+    html.append("                    </div>\n");
+
+    if (algorithm.getDescription() != null && !algorithm.getDescription().isEmpty()) {
+      html.append("                    <p class=\"algorithm-description\">")
+          .append(escapeHtml(algorithm.getDescription()))
+          .append("</p>\n");
+    }
+
+    html.append("                    <div class=\"algorithm-details\">\n");
+    if (algorithm.getPerformance() != null) {
+      html.append("                        <div class=\"performance-info\">\n");
+      html.append("                            <span class=\"detail-label\">Performance:</span>\n");
+      html.append("                            <span class=\"performance-rating\">")
+          .append(escapeHtml(algorithm.getPerformance().toString()))
+          .append("</span>\n");
+      html.append("                        </div>\n");
+    }
+    html.append("                    </div>\n");
+    html.append("                </div>\n");
   }
 
   /**
@@ -560,7 +583,6 @@ public class ResponseFormatter {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
-        .replace("`", "&#x60;") // Backtick
-        .replace("=", "&#x3D;"); // Equals sign
+        .replace("`", "&#x60;"); // Backtick
   }
 }

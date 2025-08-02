@@ -313,8 +313,7 @@ public class HashController {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
-        .replace("`", "&#x60;") // Backtick
-        .replace("=", "&#x3D;"); // Equals sign
+        .replace("`", "&#x60;"); // Backtick
   }
 
   /**
