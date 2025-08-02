@@ -1,5 +1,7 @@
 package com.snhu.sslserver.factory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class HashAlgorithmFactory {
       throw new IllegalArgumentException(
           String.format(
               "Unsupported algorithm: %s. Supported algorithms: %s",
-              algorithmName, String.join(", ", strategies.keySet())));
+              algorithmName, String.join(", ", getSupportedAlgorithmNames())));
     }
 
     return strategy;
@@ -101,6 +103,19 @@ public class HashAlgorithmFactory {
    * @return List of all available hash algorithm strategies
    */
   public List<HashAlgorithmStrategy> getAllStrategies() {
-    return List.copyOf(strategies.values());
+    return Collections.unmodifiableList(new ArrayList<>(strategies.values()));
+  }
+
+  /**
+   * Gets the names of all supported algorithms.
+   *
+   * @return List of supported algorithm names
+   */
+  private List<String> getSupportedAlgorithmNames() {
+    List<String> algorithmNames = new ArrayList<>();
+    for (Map.Entry<String, HashAlgorithmStrategy> entry : strategies.entrySet()) {
+      algorithmNames.add(entry.getKey());
+    }
+    return algorithmNames;
   }
 }
