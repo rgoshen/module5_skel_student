@@ -123,15 +123,18 @@ public class SecurityInputValidator implements IInputValidator {
           "Algorithm name contains invalid characters. Only letters, numbers, hyphens, and underscores are allowed");
     }
 
+    // Normalize algorithm name to uppercase for consistent comparison
+    String normalizedAlgorithm = trimmedAlgorithm.toUpperCase();
+
     // Check if algorithm is deprecated/insecure
-    if (cryptographicProvider.getDeprecatedAlgorithms().contains(trimmedAlgorithm.toUpperCase())) {
+    if (cryptographicProvider.getDeprecatedAlgorithms().contains(normalizedAlgorithm)) {
       errors.add(
           String.format(
               "Algorithm '%s' is deprecated and insecure. Use SHA-256 or newer", algorithm));
     }
 
     // Check if algorithm is secure and supported
-    if (!cryptographicProvider.isAlgorithmSecure(trimmedAlgorithm)) {
+    if (!cryptographicProvider.isAlgorithmSecure(normalizedAlgorithm)) {
       errors.add(
           String.format(
               "Algorithm '%s' is not secure or supported. Supported algorithms: %s",

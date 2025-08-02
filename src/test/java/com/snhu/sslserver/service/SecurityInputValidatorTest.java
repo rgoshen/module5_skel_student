@@ -88,6 +88,37 @@ class SecurityInputValidatorTest {
     }
 
     @Test
+    @DisplayName("Should handle Unicode whitespace characters")
+    void shouldHandleUnicodeWhitespace() {
+      // U+00A0 NO-BREAK SPACE, U+2003 EM SPACE
+      String input = "\u00A0Hello\u2003World\u00A0";
+      ValidationResult result = validator.validateAndSanitize(input);
+      assertThat(result.isValid()).isTrue();
+      // Should trim or normalize whitespace
+      assertThat(result.getSanitizedData()).isEqualTo("Hello World");
+    }
+
+    @Test
+    @DisplayName("Should normalize combining characters")
+    void shouldNormalizeCombiningCharacters() {
+      // "e" + COMBINING ACUTE ACCENT (U+0301)
+      String input = "Cafe\u0301";
+      ValidationResult result = validator.validateAndSanitize(input);
+      assertThat(result.isValid()).isTrue();
+      // Should normalize to single codepoint if NFC normalization is applied
+      assertThat(result.getSanitizedData()).isEqualTo("Café");
+    }
+
+    @Test
+    @DisplayName("Should accept non-ASCII symbols and emoji")
+    void shouldAcceptNonAsciiSymbolsAndEmoji() {
+      String input = "こんにちは🌟";
+      ValidationResult result = validator.validateAndSanitize(input);
+      assertThat(result.isValid()).isTrue();
+      assertThat(result.getSanitizedData()).isEqualTo("こんにちは🌟");
+    }
+
+    @Test
     @DisplayName("Should handle special characters and punctuation")
     void shouldHandleSpecialCharactersAndPunctuation() {
       String input = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?";
