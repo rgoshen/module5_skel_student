@@ -220,18 +220,18 @@ public class SecureErrorHandler {
    * @param message Log message
    * @param correlationId Correlation ID for request tracing
    * @param exception Optional exception to log
-   * @param keyValuePairs Additional structured data pairs
+   * @param logDataPairs Additional structured data pairs
    */
   private void logSecurely(
-      String message, String correlationId, Exception exception, String... keyValuePairs) {
+      String message, String correlationId, Exception exception, String... logDataPairs) {
     try {
       // Set correlation ID in MDC for structured logging
       MDC.put(CORRELATION_ID_KEY, correlationId);
 
       // Add additional structured data
-      for (int i = 0; i < keyValuePairs.length; i += 2) {
-        if (i + 1 < keyValuePairs.length) {
-          MDC.put(keyValuePairs[i], keyValuePairs[i + 1]);
+      for (int i = 0; i < logDataPairs.length; i += 2) {
+        if (i + 1 < logDataPairs.length) {
+          MDC.put(logDataPairs[i], logDataPairs[i + 1]);
         }
       }
 
