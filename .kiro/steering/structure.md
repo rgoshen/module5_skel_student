@@ -6,7 +6,18 @@ inclusion: always
 
 ## Architectural Philosophy
 
-This project follows **Clean Architecture** principles with clear separation of concerns, implementing **SOLID principles** throughout. The structure evolves from the educational skeleton to a professional, maintainable codebase suitable for enterprise environments.
+This project follows **Clean Architecture** principles with clear separation of concerns, implementing **SOLID principles** throughout. 
+
+### ⚠️ **IMPORTANT: Implementation Strategy**
+
+**Start Simple, Evolve Professionally**: This project begins with the provided educational skeleton and evolves incrementally to a professional, maintainable codebase. The enhanced structure shown below represents the **target architecture** achieved through phased development, not the starting point.
+
+**Implementation Phases**:
+1. **Phase 1**: Work with skeleton structure (`ServerApplication.java` with embedded controller)
+2. **Phase 2**: Extract service layer interfaces and implementations  
+3. **Phase 3**: Implement full professional architecture with proper separation
+
+The structure evolves from the educational skeleton to demonstrate professional development practices while meeting CS-305 assignment requirements.
 
 ## Enhanced Project Structure
 
