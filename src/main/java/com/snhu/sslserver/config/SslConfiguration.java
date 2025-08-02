@@ -1,8 +1,11 @@
 package com.snhu.sslserver.config;
 
+import java.io.InputStream;
 import java.security.KeyStore;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,45 +51,84 @@ public class SslConfiguration {
   private String keyAlias;
 
   /**
-   * Validates SSL configuration at startup to ensure proper keystore setup.
-   *
-   * @return SSL validation result
+   * Validates SSL configuration at startup to ensure proper keystore setup. Throws an exception if
+   * validation fails to prevent startup with invalid SSL configuration.
    */
   @Bean
-  public SslValidationResult validateSslConfiguration() {
+  public void validateSslConfiguration() {
     logger.info("Validating SSL/TLS configuration for HTTPS-only operation");
 
     try {
-      // Validate keystore accessibility
-      if (!keyStoreResource.exists()) {
-        logger.error("SSL keystore not found: {}", keyStoreResource.getDescription());
-        return new SslValidationResult(false, "Keystore file not found");
-      }
-
-      // Validate keystore loading
-      KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-      keyStore.load(keyStoreResource.getInputStream(), keyStorePassword.toCharArray());
-
-      // Validate key alias exists
-      if (!keyStore.containsAlias(keyAlias)) {
-        logger.error("SSL key alias not found in keystore");
-        return new SslValidationResult(false, "Key alias not found in keystore");
-      }
-
-      // Validate SSL context creation
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(null, null, null);
-
-      logger.info("SSL/TLS configuration validation successful");
-      logger.info("Keystore: {}", keyStoreResource.getDescription());
-      logger.info("Keystore type: {}", keyStoreType);
-
-      return new SslValidationResult(true, "SSL configuration valid");
-
+      KeyStore keyStore = loadKeyStore();
+      validateKeyAlias(keyStore);
+      validateSslContext(keyStore);
+      logValidationSuccess();
     } catch (Exception e) {
       logger.error("SSL/TLS configuration validation failed", e);
-      return new SslValidationResult(false, "SSL validation error: " + e.getMessage());
+      throw new IllegalStateException("SSL configuration is invalid - application cannot start", e);
     }
+  }
+
+  /**
+   * Loads and validates the SSL keystore.
+   *
+   * @return The loaded keystore
+   * @throws Exception if keystore cannot be loaded
+   */
+  private KeyStore loadKeyStore() throws Exception {
+    if (!keyStoreResource.exists()) {
+      throw new IllegalStateException(
+          "Keystore file not found: " + keyStoreResource.getDescription());
+    }
+
+    KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+    try (InputStream inputStream = keyStoreResource.getInputStream()) {
+      keyStore.load(inputStream, keyStorePassword.toCharArray());
+    }
+    return keyStore;
+  }
+
+  /**
+   * Validates that the required key alias exists in the keystore.
+   *
+   * @param keyStore The loaded keystore
+   * @throws Exception if key alias is not found
+   */
+  private void validateKeyAlias(KeyStore keyStore) throws Exception {
+    if (!keyStore.containsAlias(keyAlias)) {
+      throw new IllegalStateException("SSL key alias not found in keystore");
+    }
+  }
+
+  /**
+   * Validates SSL context creation using the actual keystore.
+   *
+   * @param keyStore The loaded keystore
+   * @throws Exception if SSL context cannot be created
+   */
+  private void validateSslContext(KeyStore keyStore) throws Exception {
+    // Initialize KeyManagerFactory with the keystore and password
+    KeyManagerFactory keyManagerFactory =
+        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+
+    // Initialize TrustManagerFactory with the keystore
+    TrustManagerFactory trustManagerFactory =
+        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    trustManagerFactory.init(keyStore);
+
+    // Initialize SSLContext with KeyManagers and TrustManagers to properly validate keystore
+    // integration
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(
+        keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+  }
+
+  /** Logs successful SSL configuration validation. */
+  private void logValidationSuccess() {
+    logger.info("SSL/TLS configuration validation successful");
+    logger.info("Keystore: {}", keyStoreResource.getDescription());
+    logger.info("Keystore type: {}", keyStoreType);
   }
 
   /**
@@ -108,29 +150,5 @@ public class SslConfiguration {
             logger.info("SSL security headers and HTTPS enforcement enabled");
           });
     };
-  }
-
-  /** Result of SSL configuration validation. */
-  public static class SslValidationResult {
-    private final boolean valid;
-    private final String message;
-
-    public SslValidationResult(boolean valid, String message) {
-      this.valid = valid;
-      this.message = message;
-    }
-
-    public boolean isValid() {
-      return valid;
-    }
-
-    public String getMessage() {
-      return message;
-    }
-
-    @Override
-    public String toString() {
-      return "SslValidationResult{valid=" + valid + ", message='" + message + "'}";
-    }
   }
 }

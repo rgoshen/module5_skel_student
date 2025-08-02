@@ -1,17 +1,9 @@
 package com.snhu.sslserver.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,18 +46,18 @@ class SslIntegrationTest {
   private String httpsBaseUrl;
 
   @BeforeEach
-  void setUp() throws NoSuchAlgorithmException, KeyManagementException {
-    // Configure TestRestTemplate to accept self-signed certificates for testing
+  void setUp() throws Exception {
+    // Configure global SSL context to accept all certificates for testing
+    javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
+    sslContext.init(null, new javax.net.ssl.TrustManager[] {new AcceptAllTrustManager()}, null);
+    javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+    // Configure TestRestTemplate for HTTPS testing
     restTemplate = new TestRestTemplate();
     restTemplate
         .getRestTemplate()
         .setRequestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory());
-
-    // Configure SSL context to trust self-signed certificates for testing
-    SSLContext sslContext = SSLContext.getInstance("TLS");
-    sslContext.init(null, new TrustManager[] {new AcceptAllTrustManager()}, null);
-    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-    HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
 
     objectMapper = new ObjectMapper();
     httpsBaseUrl = "https://localhost:" + port;
@@ -120,8 +112,14 @@ class SslIntegrationTest {
         response.getHeaders().containsKey("X-Frame-Options"),
         "X-Frame-Options header should be present");
     assertTrue(
+        response.getHeaders().containsKey("X-XSS-Protection"),
+        "X-XSS-Protection header should be present");
+    assertTrue(
         response.getHeaders().containsKey("Content-Security-Policy"),
         "CSP header should be present");
+    assertTrue(
+        response.getHeaders().containsKey("Referrer-Policy"),
+        "Referrer-Policy header should be present");
     assertTrue(
         response.getHeaders().containsKey("X-CS305-Checksum-System"),
         "Custom identification header should be present");
@@ -132,9 +130,20 @@ class SslIntegrationTest {
         response.getHeaders().getFirst("Strict-Transport-Security"));
     assertEquals("nosniff", response.getHeaders().getFirst("X-Content-Type-Options"));
     assertEquals("DENY", response.getHeaders().getFirst("X-Frame-Options"));
+    assertEquals("1; mode=block", response.getHeaders().getFirst("X-XSS-Protection"));
+    assertEquals(
+        "strict-origin-when-cross-origin", response.getHeaders().getFirst("Referrer-Policy"));
     assertEquals(
         "Rick-Goshen-Secure-Implementation",
         response.getHeaders().getFirst("X-CS305-Checksum-System"));
+
+    // Verify strengthened CSP (no unsafe-inline)
+    String cspHeader = response.getHeaders().getFirst("Content-Security-Policy");
+    assertNotNull(cspHeader);
+    assertTrue(cspHeader.contains("default-src 'self'"));
+    assertTrue(cspHeader.contains("script-src 'self'"));
+    assertTrue(cspHeader.contains("style-src 'self'"));
+    assertFalse(cspHeader.contains("unsafe-inline"), "CSP should not contain unsafe-inline");
   }
 
   @Test
@@ -260,23 +269,23 @@ class SslIntegrationTest {
   }
 
   /**
-   * Trust manager that accepts all certificates for testing purposes. IMPORTANT: This should only
-   * be used in test environments.
+   * Trust manager that accepts all certificates for testing purposes. This is used locally within
+   * the test to configure SSL connections.
    */
-  private static class AcceptAllTrustManager implements X509TrustManager {
+  private static class AcceptAllTrustManager implements javax.net.ssl.X509TrustManager {
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) {
+    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
       // Accept all client certificates for testing
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) {
+    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
       // Accept all server certificates for testing
     }
 
     @Override
-    public X509Certificate[] getAcceptedIssuers() {
-      return new X509Certificate[0];
+    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+      return new java.security.cert.X509Certificate[0];
     }
   }
 }
