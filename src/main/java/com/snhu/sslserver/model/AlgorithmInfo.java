@@ -33,11 +33,24 @@ public class AlgorithmInfo {
      */
     public AlgorithmInfo(String name, boolean secure, PerformanceRating performance,
             String description, Set<String> aliases) {
-        this.name = Objects.requireNonNull(name, "Algorithm name cannot be null");
+        if (name == null) {
+            throw new IllegalArgumentException("Algorithm name cannot be null");
+        }
+        if (performance == null) {
+            throw new IllegalArgumentException("Performance rating cannot be null");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("Description cannot be null");
+        }
+        if (aliases == null) {
+            throw new IllegalArgumentException("Aliases cannot be null");
+        }
+        
+        this.name = name;
         this.secure = secure;
-        this.performance = Objects.requireNonNull(performance, "Performance rating cannot be null");
-        this.description = Objects.requireNonNull(description, "Description cannot be null");
-        this.aliases = createImmutableSet(Objects.requireNonNull(aliases, "Aliases cannot be null"));
+        this.performance = performance;
+        this.description = description;
+        this.aliases = createImmutableSet(aliases);
     }
 
     /**

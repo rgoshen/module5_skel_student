@@ -31,10 +31,23 @@ public class HashResult {
      */
     public HashResult(String originalData, String algorithm, String hexHash, 
                      Instant timestamp, long computationTimeMs) {
-        this.originalData = Objects.requireNonNull(originalData, "Original data cannot be null");
-        this.algorithm = Objects.requireNonNull(algorithm, "Algorithm cannot be null");
-        this.hexHash = Objects.requireNonNull(hexHash, "Hex hash cannot be null");
-        this.timestamp = Objects.requireNonNull(timestamp, "Timestamp cannot be null");
+        if (originalData == null) {
+            throw new IllegalArgumentException("Original data cannot be null");
+        }
+        if (algorithm == null) {
+            throw new IllegalArgumentException("Algorithm cannot be null");
+        }
+        if (hexHash == null) {
+            throw new IllegalArgumentException("Hex hash cannot be null");
+        }
+        if (timestamp == null) {
+            throw new IllegalArgumentException("Timestamp cannot be null");
+        }
+        
+        this.originalData = originalData;
+        this.algorithm = algorithm;
+        this.hexHash = hexHash;
+        this.timestamp = timestamp;
         
         if (computationTimeMs < 0) {
             throw new IllegalArgumentException("Computation time cannot be negative: " + computationTimeMs);

@@ -1,4 +1,4 @@
-package com.snhu.server;
+package com.snhu.sslserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
