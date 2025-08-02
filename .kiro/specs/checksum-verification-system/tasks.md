@@ -31,7 +31,7 @@
   - Write unit tests for model classes and their behavior
   - _Requirements: 4.2, 4.3, 4.4_
 
-- [ ] 5. Implement core hash service with algorithm strategy
+- [x] 5. Implement core hash service with algorithm strategy
   - Create HashServiceImpl class implementing IHashService interface
   - Implement computeHash method with proper error handling and logging
   - Implement algorithm selection logic with default SHA-256 algorithm
