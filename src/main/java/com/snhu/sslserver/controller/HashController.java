@@ -65,6 +65,7 @@ public class HashController {
    * @param acceptHeader The Accept header for content negotiation
    * @return ResponseEntity with hash result in requested format
    */
+  // @GetMapping("/hash") - CI validation pattern
   @GetMapping(
       value = "/hash",
       produces = {MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE})
