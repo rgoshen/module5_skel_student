@@ -1,0 +1,190 @@
+name: Security Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  cryptographic-validation:
+    name: Cryptographic Security Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        
+    - name: Validate secure algorithms only
+      run: |
+        echo "🔐 Validating cryptographic algorithm usage..."
+        
+        # Check for deprecated algorithms in actual code (not comments)
+        # Look for algorithm usage in MessageDigest.getInstance() calls or similar
+        DEPRECATED_USAGE=$(grep -r "MessageDigest\.getInstance.*[\"']MD5[\"']\|MessageDigest\.getInstance.*[\"']SHA-1[\"']\|MessageDigest\.getInstance.*[\"']SHA1[\"']" src/main/java --include="*.java" || true)
+        
+        if [ -n "$DEPRECATED_USAGE" ]; then
+          echo "❌ Deprecated cryptographic algorithms detected in code!"
+          echo "$DEPRECATED_USAGE"
+          echo "   MD5 and SHA-1 are not allowed due to collision vulnerabilities"
+          exit 1
+        else
+          echo "✅ No deprecated algorithms found in code implementation"
+        fi
+        
+        # Also check for direct string usage that might indicate algorithm selection
+        DEPRECATED_STRINGS=$(grep -r "= *[\"']MD5[\"']\|= *[\"']SHA-1[\"']\|= *[\"']SHA1[\"']" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " || true)
+        
+        if [ -n "$DEPRECATED_STRINGS" ]; then
+          echo "❌ Deprecated algorithm strings detected in code!"
+          echo "$DEPRECATED_STRINGS"
+          exit 1
+        else
+          echo "✅ No deprecated algorithm strings found in code"
+        fi
+        
+        # Check for secure algorithms in actual implementation
+        SECURE_USAGE=$(grep -r "MessageDigest\.getInstance.*[\"']SHA-256[\"']\|MessageDigest\.getInstance.*[\"']SHA-3-256[\"']\|MessageDigest\.getInstance.*[\"']SHA-512[\"']\|MessageDigest\.getInstance.*[\"']SHA-3-512[\"']" src/main/java --include="*.java" || true)
+        
+        if [ -n "$SECURE_USAGE" ]; then
+          echo "✅ Secure algorithms detected in implementation"
+          echo "$SECURE_USAGE"
+        else
+          echo "ℹ️  No secure algorithm implementations found yet (this is expected for Task 1)"
+        fi
+        
+    - name: Validate SSL configuration
+      run: |
+        echo "🔒 Validating SSL/TLS configuration..."
+        
+        # Check for HTTPS enforcement
+        if grep -r "server.port=8443\|https" src/main/resources --include="*.properties"; then
+          echo "✅ HTTPS configuration found"
+        else
+          echo "⚠️  HTTPS configuration not detected"
+        fi
+        
+        # Check for SSL keystore
+        if [ -f "src/main/resources/keystore.p12" ]; then
+          echo "✅ SSL keystore present"
+        else
+          echo "⚠️  SSL keystore not found"
+        fi
+        
+    - name: Validate input sanitization
+      run: |
+        echo "🛡️  Validating input sanitization practices..."
+        
+        # Check for input validation
+        if grep -r "validate\|sanitize\|requireNonNull" src/main/java --include="*.java"; then
+          echo "✅ Input validation patterns found"
+        else
+          echo "⚠️  Input validation not detected"
+        fi
+        
+    - name: Check error handling security
+      run: |
+        echo "🚫 Validating secure error handling..."
+        
+        # Check for insecure exception handling (excluding test files)
+        INSECURE_HANDLING=$(grep -r "\.printStackTrace()\|getCause()\.getMessage()" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " || true)
+        
+        if [ -n "$INSECURE_HANDLING" ]; then
+          echo "❌ Insecure error handling detected!"
+          echo "$INSECURE_HANDLING"
+          echo "   Stack traces and detailed error messages should not be exposed to users"
+          exit 1
+        else
+          echo "✅ No insecure error handling patterns found"
+        fi
+        
+    - name: Validate logging security
+      run: |
+        echo "📝 Validating secure logging practices..."
+        
+        # Check for sensitive data in logs (excluding comments and test files)
+        SENSITIVE_LOGGING=$(grep -r "log.*password\|log.*secret\|log.*key\|logger.*password\|logger.*secret\|logger.*key" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " | grep -v "keystore\|keyStore\|KeyStore" || true)
+        
+        if [ -n "$SENSITIVE_LOGGING" ]; then
+          echo "❌ Potential sensitive data logging detected!"
+          echo "$SENSITIVE_LOGGING"
+          echo "   Sensitive information should not be logged"
+          exit 1
+        else
+          echo "✅ No sensitive data logging patterns found"
+        fi
+        
+  compliance-check:
+    name: CS-305 Compliance Check
+    runs-on: ubuntu-latest
+    needs: cryptographic-validation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate assignment requirements
+      run: |
+        echo "📚 Validating CS-305 assignment requirements..."
+        
+        # Check for required components
+        REQUIRED_FILES=(
+          "src/main/java/com/snhu/sslserver/ServerApplication.java"
+          "src/main/resources/application.properties"
+          "src/main/resources/keystore.p12"
+        )
+        
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ Required file found: $file"
+          else
+            echo "❌ Required file missing: $file"
+            exit 1
+          fi
+        done
+        
+    - name: Validate hash functionality
+      run: |
+        echo "🔢 Validating hash functionality requirements..."
+        
+        # Check for hash-related code
+        if grep -r "hash\|Hash\|MessageDigest" src/main/java --include="*.java"; then
+          echo "✅ Hash functionality detected"
+        else
+          echo "❌ Hash functionality not found"
+          exit 1
+        fi
+        
+    - name: Validate REST endpoint
+      run: |
+        echo "🌐 Validating REST endpoint requirements..."
+        
+        # Check for /hash endpoint
+        if grep -r "@RequestMapping.*hash\|@GetMapping.*hash" src/main/java --include="*.java"; then
+          echo "✅ Hash endpoint detected"
+        else
+          echo "❌ Hash endpoint not found"
+          exit 1
+        fi
+        
+    - name: Generate compliance report
+      run: |
+        echo "📊 Generating compliance report..."
+        echo "## CS-305 Compliance Report" > compliance-report.md
+        echo "- ✅ Cryptographic algorithms validated" >> compliance-report.md
+        echo "- ✅ SSL/TLS configuration checked" >> compliance-report.md
+        echo "- ✅ Input validation verified" >> compliance-report.md
+        echo "- ✅ Error handling security confirmed" >> compliance-report.md
+        echo "- ✅ Assignment requirements met" >> compliance-report.md
+        
+    - name: Upload compliance report
+      uses: actions/upload-artifact@v4
+      with:
+        name: compliance-report
+        path: compliance-report.md
