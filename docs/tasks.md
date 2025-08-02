@@ -4,7 +4,7 @@
 
 This implementation plan breaks down the CS305 checksum verification project into discrete, trackable tasks. Each task includes clear descriptions, expected outcomes, and dependencies.
 
-**Project Timeline**: 3-5 days  
+**Project Timeline**: 3-5 days
 **Estimated Effort**: 8-12 hours total
 
 ---
@@ -712,22 +712,22 @@ This implementation plan breaks down the CS305 checksum verification project int
 // Implementation example for validation task
 @Component
 public class SecurityInputValidator implements IInputValidator {
-    
-    private static final Pattern SAFE_INPUT_PATTERN = 
+
+    private static final Pattern SAFE_INPUT_PATTERN =
         Pattern.compile("^[a-zA-Z0-9\\s\\-_\\.]{1,100}$");
-    
+
     @Override
     public ValidationResult validate(String input) {
         // Length validation
         if (input == null || input.trim().isEmpty()) {
             return ValidationResult.invalid("Input cannot be empty");
         }
-        
+
         // Character set validation
         if (!SAFE_INPUT_PATTERN.matcher(input).matches()) {
             return ValidationResult.invalid("Input contains invalid characters");
         }
-        
+
         // Business logic validation
         return validateNameFormat(input);
     }
@@ -739,13 +739,13 @@ public class SecurityInputValidator implements IInputValidator {
 // Implementation pattern for error handling task
 @Component
 public class SecureErrorHandler {
-    
+
     public ResponseEntity<String> handleSecurely(Exception ex, String operation) {
         String errorId = UUID.randomUUID().toString();
-        
+
         // Log technical details internally only
         log.error("Error [{}] in {}: {}", errorId, operation, ex.getMessage(), ex);
-        
+
         // Return safe message to user
         String safeMessage = determineSafeMessage(ex.getClass());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -760,14 +760,14 @@ public class SecureErrorHandler {
 ```java
 // Implementation guide for optimization tasks
 public final class PerformanceOptimizedUtils {
-    
+
     // Pre-computed lookup table for hex conversion
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
-    
+
     // Thread-safe cache for MessageDigest instances
-    private static final Map<String, MessageDigest> DIGEST_CACHE = 
+    private static final Map<String, MessageDigest> DIGEST_CACHE =
         new ConcurrentHashMap<>();
-    
+
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -786,17 +786,17 @@ public final class PerformanceOptimizedUtils {
 ```java
 /**
  * Service responsible for secure cryptographic hash generation.
- * 
+ *
  * <p>This service provides thread-safe hash computation using industry-standard
  * algorithms with built-in security validation. All operations are optimized
  * for performance while maintaining security best practices.</p>
- * 
+ *
  * <p><strong>Security Note:</strong> This service automatically rejects
  * deprecated algorithms and enforces current NIST standards.</p>
- * 
+ *
  * <p><strong>Performance Note:</strong> Uses optimized data structures and
  * caching for efficient operation under concurrent load.</p>
- * 
+ *
  * @author Student Name
  * @version 1.0
  * @since 1.0
@@ -806,24 +806,24 @@ public final class PerformanceOptimizedUtils {
 @Service
 @Slf4j
 public class HashService implements IHashService {
-    
+
     /**
      * Computes secure hash for the given input using specified algorithm.
-     * 
+     *
      * <p>This method performs comprehensive validation and uses optimized
      * cryptographic operations. The implementation is thread-safe and
      * includes proper error handling.</p>
-     * 
+     *
      * @param input the string to hash; must not be null or empty
      * @param algorithm the hash algorithm name from Java Security Standard names
      * @return hexadecimal representation of the computed hash
      * @throws IllegalArgumentException if input is null, empty, or invalid format
      * @throws SecurityException if algorithm is not secure or not supported
      * @throws CryptographicException if hash computation fails
-     * 
+     *
      * @implNote Uses UTF-8 encoding and optimized byte-to-hex conversion
      * @implSpec Thread-safe implementation with proper resource management
-     * 
+     *
      * @example
      * <pre>{@code
      * HashService service = new HashService();
@@ -847,13 +847,13 @@ public class HashService implements IHashService {
 @RequestMapping("/api/v1/hash")
 @Validated
 public class HashController {
-    
+
     private final IHashService hashService;
     private final IInputValidator validator;
     private final IResponseFormatter formatter;
-    
+
     // Constructor injection for dependencies
-    public HashController(IHashService hashService, 
+    public HashController(IHashService hashService,
                          IInputValidator validator,
                          IResponseFormatter formatter) {
         this.hashService = Objects.requireNonNull(hashService);
@@ -866,9 +866,9 @@ public class HashController {
 @Service
 @Slf4j
 public class HashServiceImpl implements IHashService {
-    
+
     private final ICryptographicProvider cryptoProvider;
-    
+
     public HashServiceImpl(ICryptographicProvider cryptoProvider) {
         this.cryptoProvider = Objects.requireNonNull(cryptoProvider);
     }
@@ -888,13 +888,13 @@ public class CryptographicProvider implements ICryptographicProvider {
 // Unit Test Example for Service Layer
 @ExtendWith(MockitoExtension.class)
 class HashServiceTest {
-    
+
     @Mock
     private ICryptographicProvider cryptoProvider;
-    
+
     @InjectMocks
     private HashServiceImpl hashService;
-    
+
     @Test
     @DisplayName("Should compute hash successfully with valid input")
     void shouldComputeHashSuccessfully() {
@@ -902,25 +902,25 @@ class HashServiceTest {
         String input = "John Doe";
         String algorithm = "SHA-256";
         String expectedHash = "expected_hash_value";
-        
+
         when(cryptoProvider.computeHash(input, algorithm))
             .thenReturn(expectedHash);
-        
+
         // When
         String result = hashService.computeHash(input, algorithm);
-        
+
         // Then
         assertThat(result).isEqualTo(expectedHash);
         verify(cryptoProvider).computeHash(input, algorithm);
     }
-    
+
     @Test
     @DisplayName("Should throw SecurityException for insecure algorithm")
     void shouldRejectInsecureAlgorithm() {
         // Given
         String input = "John Doe";
         String insecureAlgorithm = "MD5";
-        
+
         // When & Then
         assertThatThrownBy(() -> hashService.computeHash(input, insecureAlgorithm))
             .isInstanceOf(SecurityException.class)
@@ -931,16 +931,16 @@ class HashServiceTest {
 // Integration Test Example
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HashControllerIntegrationTest {
-    
+
     @Autowired
     private TestRestTemplate restTemplate;
-    
+
     @Test
     @DisplayName("Should return hash response via HTTPS endpoint")
     void shouldReturnHashViaHttps() {
         // When
         ResponseEntity<String> response = restTemplate.getForEntity("/hash", String.class);
-        
+
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("SHA-256");

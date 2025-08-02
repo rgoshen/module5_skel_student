@@ -114,7 +114,7 @@ server.port=8443
 class HashServiceTest {
     @Mock private ICryptographicProvider provider;
     @InjectMocks private HashServiceImpl service;
-    
+
     @Test
     void shouldComputeHashSuccessfully() {
         // Use Mockito for mocking dependencies
@@ -126,7 +126,7 @@ class HashServiceTest {
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HashControllerIntegrationTest {
     @Autowired private TestRestTemplate restTemplate;
-    
+
     @Test
     void shouldReturnValidHashResponse() {
         // Test full HTTP request/response cycle
@@ -178,7 +178,7 @@ public abstract class AbstractHashProcessor {
         String hexHash = bytesToHex(hashBytes);
         return createResult(sanitized, hexHash, getAlgorithmName());
     }
-    
+
     protected abstract byte[] computeHashBytes(String input);
     protected abstract String getAlgorithmName();
 }
@@ -234,16 +234,16 @@ public class HashService {
     public String computeHash(String input, String algorithm) {
         // Log operation start (no sensitive data)
         log.info("Computing hash with algorithm: {}", algorithm);
-        
+
         try {
             String result = performHashOperation(input, algorithm);
-            
+
             // Log success with context
-            log.info("Hash computation successful, algorithm: {}, input length: {}", 
+            log.info("Hash computation successful, algorithm: {}, input length: {}",
                 algorithm, input.length());
-            
+
             return result;
-            
+
         } catch (Exception e) {
             // Log error with correlation ID for debugging
             String errorId = UUID.randomUUID().toString();
@@ -273,16 +273,16 @@ public class HashService {
 @Component
 @Validated
 public class HashConfiguration {
-    
+
     @NotBlank
     private String defaultAlgorithm = "SHA-256";
-    
+
     @Min(1) @Max(10000)
     private int maxInputLength = 1000;
-    
+
     @NotEmpty
     private Set<String> allowedAlgorithms = Set.of("SHA-256", "SHA-3-256", "SHA-512");
-    
+
     // Getters and setters
 }
 ```
@@ -311,7 +311,7 @@ public static String bytesToHex(byte[] bytes) {
 }
 
 // Thread-safe algorithm cache
-private static final Map<String, MessageDigest> ALGORITHM_CACHE = 
+private static final Map<String, MessageDigest> ALGORITHM_CACHE =
     new ConcurrentHashMap<>();
 ```
 
@@ -328,11 +328,11 @@ private static final Map<String, MessageDigest> ALGORITHM_CACHE =
 @RestController
 @RequestMapping("/api/v1/hash")
 public class HashController {
-    
+
     @GetMapping(produces = {MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> generateHash(
             @RequestHeader(value = "Accept", defaultValue = "text/html") String acceptHeader) {
-        
+
         if (acceptHeader.contains("application/json")) {
             return ResponseEntity.ok(createJsonResponse());
         }

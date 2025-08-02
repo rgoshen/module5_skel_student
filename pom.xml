@@ -47,6 +47,64 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			
+			<!-- Spotless plugin for code formatting -->
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.27.2</version>
+				<configuration>
+					<java>
+						<!-- Apply to all Java files -->
+						<includes>
+							<include>src/main/java/**/*.java</include>
+							<include>src/test/java/**/*.java</include>
+						</includes>
+						
+						<!-- Use Google Java Format -->
+						<googleJavaFormat>
+							<version>1.7</version>
+							<style>GOOGLE</style>
+						</googleJavaFormat>
+						
+						<!-- Remove unused imports -->
+						<removeUnusedImports />
+						
+						<!-- Format imports -->
+						<importOrder>
+							<order>java,javax,org,com</order>
+						</importOrder>
+						
+						<!-- Ensure files end with newline -->
+						<endWithNewline />
+						
+						<!-- Remove trailing whitespace -->
+						<trimTrailingWhitespace />
+					</java>
+					
+					<!-- Format other file types -->
+					<formats>
+						<!-- Format Markdown files -->
+						<format>
+							<includes>
+								<include>*.md</include>
+								<include>**/*.md</include>
+							</includes>
+							<endWithNewline />
+							<trimTrailingWhitespace />
+						</format>
+					</formats>
+				</configuration>
+				<executions>
+					<!-- Check formatting during validate phase -->
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<phase>validate</phase>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

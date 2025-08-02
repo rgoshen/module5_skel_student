@@ -37,7 +37,7 @@ ssl-server/
 
 ### Framework & Libraries
 - **Spring Boot 2.2.4.RELEASE** - Main application framework
-- **Spring Web** - Web MVC and RESTful capabilities  
+- **Spring Web** - Web MVC and RESTful capabilities
 - **Spring Data REST** - RESTful web services
 - **Java 8** - Target Java version
 - **JUnit 5** - Testing framework
@@ -85,7 +85,7 @@ public String generateChecksum() {
 ```
 
 #### 3. RESTful API Requirements
-- **Endpoint**: `/hash` 
+- **Endpoint**: `/hash`
 - **Method**: GET request mapping
 - **Response Format**: HTML displaying:
   - Original data string (containing your first and last name)
@@ -127,10 +127,10 @@ public String generateChecksum() {
    ```bash
    # Clean and compile
    ./mvnw clean compile
-   
+
    # Run tests
    ./mvnw test
-   
+
    # Package application
    ./mvnw package
    ```
@@ -156,7 +156,7 @@ public String generateChecksum() {
    ```bash
    # Start the SSL server
    ./mvnw spring-boot:run
-   
+
    # Alternative: Run packaged JAR
    java -jar target/ssl-server-0.0.1-SNAPSHOT.jar
    ```
@@ -211,7 +211,7 @@ Complete the **Module Five Coding Assignment Checksum Verification Template** wi
 MessageDigest.getInstance("MD5");        // Vulnerable to collisions
 MessageDigest.getInstance("SHA-1");      // Deprecated, collision vulnerabilities
 
-// ✅ DO: Use secure, modern algorithms  
+// ✅ DO: Use secure, modern algorithms
 MessageDigest.getInstance("SHA-256");    // Secure, widely supported
 MessageDigest.getInstance("SHA-3-256");  // Latest standard, excellent security
 ```
@@ -317,4 +317,3 @@ MessageDigest.getInstance("SHA-3-256");  // Latest standard, excellent security
 - Verify algorithm name matches Oracle standards exactly
 - Check for typos in MessageDigest.getInstance() calls
 - Ensure proper exception handling around cryptographic operations
-

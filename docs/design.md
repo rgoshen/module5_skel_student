@@ -10,22 +10,22 @@ graph TB
         Browser[Client Browser<br/>HTTPS Request]
         Controller[Hash Controller<br/>@RestController<br/>• Request Validation<br/>• Response Formatting<br/>• Error Handling]
     end
-    
+
     subgraph "Business Logic Layer"
         HashService[Hash Service<br/>@Service<br/>• Algorithm Management<br/>• Data Processing<br/>• Business Rules]
         ValidationService[Validation Service<br/>@Service<br/>• Input Sanitization<br/>• Security Validation<br/>• Data Integrity]
     end
-    
+
     subgraph "Infrastructure Layer"
         CryptoProvider[Crypto Provider<br/>• MessageDigest Factory<br/>• Algorithm Configuration<br/>• Error Handling]
         ConfigManager[Config Manager<br/>• SSL Configuration<br/>• Application Properties<br/>• Security Settings]
     end
-    
+
     subgraph "Cross-Cutting Concerns"
         Logging[Logging Service<br/>• Audit Trail<br/>• Error Tracking<br/>• Performance Metrics]
         Security[Security Manager<br/>• Input Validation<br/>• Error Sanitization<br/>• SSL Management]
     end
-    
+
     Browser -->|HTTPS/SSL<br/>Port 8443| Controller
     Controller --> HashService
     Controller --> ValidationService
@@ -35,12 +35,12 @@ graph TB
     HashService --> Logging
     CryptoProvider --> ConfigManager
     Security --> ConfigManager
-    
+
     classDef presentation fill:#e3f2fd
     classDef business fill:#f3e5f5
     classDef infrastructure fill:#e8f5e8
     classDef crossCutting fill:#fff3e0
-    
+
     class Browser,Controller presentation
     class HashService,ValidationService business
     class CryptoProvider,ConfigManager infrastructure
@@ -59,29 +59,29 @@ classDiagram
         +handleErrors() ResponseEntity
         -validateRequest() boolean
     }
-    
+
     class HashService {
         +computeHash(String) String
         +getAlgorithmName() String
         -formatOutput() String
     }
-    
+
     class CryptographicProvider {
         +createDigest(String) MessageDigest
         +bytesToHex(byte[]) String
         -validateAlgorithm() boolean
     }
-    
+
     class InputValidator {
         +sanitizeInput(String) String
         +validateFormat(String) boolean
         +checkSecurity(String) boolean
     }
-    
+
     HashController --> HashService: uses
     HashController --> InputValidator: uses
     HashService --> CryptographicProvider: uses
-    
+
     note for HashController "Responsibility: HTTP request/response handling"
     note for HashService "Responsibility: Business logic and hash operations"
     note for CryptographicProvider "Responsibility: Cryptographic operations"
@@ -99,29 +99,29 @@ classDiagram
         +getAlgorithmName() String
         +isSecure() boolean
     }
-    
+
     class SHA256Strategy {
         +computeHash(String) String
         +getAlgorithmName() String
         +isSecure() boolean
     }
-    
+
     class SHA3Strategy {
         +computeHash(String) String
         +getAlgorithmName() String
         +isSecure() boolean
     }
-    
+
     class HashService {
         -strategy: HashAlgorithmStrategy
         +setStrategy(HashAlgorithmStrategy)
         +generateHash(String) String
     }
-    
+
     HashAlgorithmStrategy <|.. SHA256Strategy
     HashAlgorithmStrategy <|.. SHA3Strategy
     HashService --> HashAlgorithmStrategy: uses
-    
+
     note for HashAlgorithmStrategy "New algorithms can be added without modifying existing code"
 ```
 
@@ -135,34 +135,34 @@ classDiagram
         -validator: IInputValidator
         +generateHash() ResponseEntity
     }
-    
+
     class IHashService {
         <<interface>>
         +computeHash(String) String
         +getAlgorithmInfo() AlgorithmInfo
     }
-    
+
     class IInputValidator {
         <<interface>>
         +validate(String) ValidationResult
         +sanitize(String) String
     }
-    
+
     class HashServiceImpl {
         +computeHash(String) String
         +getAlgorithmInfo() AlgorithmInfo
     }
-    
+
     class SecurityValidator {
         +validate(String) ValidationResult
         +sanitize(String) String
     }
-    
+
     HashController --> IHashService: depends on abstraction
     HashController --> IInputValidator: depends on abstraction
     IHashService <|.. HashServiceImpl: implements
     IInputValidator <|.. SecurityValidator: implements
-    
+
     note for HashController "Depends on interfaces, not concrete classes"
 ```
 
@@ -182,12 +182,12 @@ public interface HashAlgorithmStrategy {
      * @throws SecurityException if algorithm is compromised
      */
     String computeHash(String input) throws SecurityException;
-    
+
     /**
      * @return Algorithm name for display purposes
      */
     String getAlgorithmName();
-    
+
     /**
      * @return true if algorithm meets current security standards
      */
@@ -203,10 +203,10 @@ public interface HashAlgorithmStrategy {
  */
 @Component
 public class HashAlgorithmFactory {
-    
-    private static final Set<String> SECURE_ALGORITHMS = 
+
+    private static final Set<String> SECURE_ALGORITHMS =
         Set.of("SHA-256", "SHA-3-256", "SHA-512", "SHA-3-512");
-    
+
     /**
      * Creates appropriate hash strategy based on algorithm name
      * @param algorithmName Name of the hash algorithm
@@ -215,7 +215,7 @@ public class HashAlgorithmFactory {
      */
     public HashAlgorithmStrategy createStrategy(String algorithmName) {
         validateAlgorithmSecurity(algorithmName);
-        
+
         return switch (algorithmName.toUpperCase()) {
             case "SHA-256" -> new SHA256Strategy();
             case "SHA-3-256" -> new SHA3_256Strategy();
@@ -225,7 +225,7 @@ public class HashAlgorithmFactory {
                 "Unsupported algorithm: " + algorithmName);
         };
     }
-    
+
     private void validateAlgorithmSecurity(String algorithm) {
         if (!SECURE_ALGORITHMS.contains(algorithm)) {
             throw new SecurityException(
@@ -242,7 +242,7 @@ public class HashAlgorithmFactory {
  * Ensures consistent processing flow while allowing algorithm-specific customization
  */
 public abstract class AbstractHashProcessor {
-    
+
     /**
      * Template method defining the hash processing workflow
      * @param input Input string to process
@@ -251,21 +251,21 @@ public abstract class AbstractHashProcessor {
     public final ProcessedHashResult processHash(String input) {
         // Step 1: Validate and sanitize input
         String sanitizedInput = validateAndSanitizeInput(input);
-        
+
         // Step 2: Compute hash (algorithm-specific)
         byte[] hashBytes = computeHashBytes(sanitizedInput);
-        
+
         // Step 3: Convert to hex representation
         String hexHash = bytesToHex(hashBytes);
-        
+
         // Step 4: Create result object
         return createResult(sanitizedInput, hexHash, getAlgorithmName());
     }
-    
+
     // Template methods for subclasses to implement
     protected abstract byte[] computeHashBytes(String input);
     protected abstract String getAlgorithmName();
-    
+
     // Common implementation methods
     private String validateAndSanitizeInput(String input) {
         if (input == null || input.trim().isEmpty()) {
@@ -273,7 +273,7 @@ public abstract class AbstractHashProcessor {
         }
         return input.trim();
     }
-    
+
     private String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
@@ -332,14 +332,14 @@ public String generateChecksum() {
 ```java
 /**
  * Service responsible for secure hash generation and validation.
- * 
+ *
  * <p>This service implements industry-standard cryptographic hash functions
  * with built-in security validation to prevent the use of compromised algorithms.
  * All operations are designed to be thread-safe and performant.</p>
- * 
- * <p><strong>Security Note:</strong> This service automatically rejects 
+ *
+ * <p><strong>Security Note:</strong> This service automatically rejects
  * deprecated algorithms (MD5, SHA-1) and enforces current security standards.</p>
- * 
+ *
  * @author CS305 Student
  * @version 1.0
  * @since 1.0
@@ -349,10 +349,10 @@ public String generateChecksum() {
 @Service
 @Slf4j
 public class HashService implements IHashService {
-    
+
     /**
      * Computes cryptographic hash for the given input string.
-     * 
+     *
      * <p>This method performs the following operations:</p>
      * <ol>
      *   <li>Validates input for security compliance</li>
@@ -360,7 +360,7 @@ public class HashService implements IHashService {
      *   <li>Converts result to hexadecimal representation</li>
      *   <li>Logs operation for audit purposes</li>
      * </ol>
-     * 
+     *
      * @param input the string to be hashed; must not be null or empty
      * @param algorithmName the name of the hash algorithm to use
      * @return hexadecimal representation of the computed hash
@@ -368,10 +368,10 @@ public class HashService implements IHashService {
      * @throws SecurityException if the specified algorithm is not secure
      * @throws CryptographicException if hash computation fails
      * @throws RuntimeException if an unexpected error occurs
-     * 
+     *
      * @implNote This method uses UTF-8 encoding for string-to-byte conversion
      *           to ensure consistent results across different platforms.
-     * 
+     *
      * @example
      * <pre>{@code
      * HashService service = new HashService();
@@ -380,7 +380,7 @@ public class HashService implements IHashService {
      * }</pre>
      */
     @Override
-    public String computeHash(@NonNull String input, @NonNull String algorithmName) 
+    public String computeHash(@NonNull String input, @NonNull String algorithmName)
             throws SecurityException, CryptographicException {
         // Implementation details...
     }
@@ -398,30 +398,30 @@ public class HashService implements IHashService {
 @Validated
 @Slf4j
 public class HashController {
-    
+
     // Constants use UPPER_SNAKE_CASE
     private static final String DEFAULT_ALGORITHM = "SHA-256";
     private static final int MAX_INPUT_LENGTH = 1000;
     private static final String CONTENT_TYPE_HTML = "text/html;charset=UTF-8";
-    
+
     // Dependencies injected via constructor (immutable)
     private final IHashService hashService;
     private final IInputValidator inputValidator;
     private final IResponseFormatter responseFormatter;
-    
+
     /**
      * Constructor for dependency injection.
      * All dependencies are required and validated at construction time.
      */
     public HashController(
             @NonNull IHashService hashService,
-            @NonNull IInputValidator inputValidator, 
+            @NonNull IInputValidator inputValidator,
             @NonNull IResponseFormatter responseFormatter) {
         this.hashService = Objects.requireNonNull(hashService, "Hash service cannot be null");
         this.inputValidator = Objects.requireNonNull(inputValidator, "Input validator cannot be null");
         this.responseFormatter = Objects.requireNonNull(responseFormatter, "Response formatter cannot be null");
     }
-    
+
     /**
      * Generates hash for student name with comprehensive error handling.
      */
@@ -431,40 +431,40 @@ public class HashController {
             // Step 1: Get and validate student data
             String studentName = getStudentNameFromConfig();
             ValidationResult validationResult = inputValidator.validate(studentName);
-            
+
             if (!validationResult.isValid()) {
                 log.warn("Invalid input detected: {}", validationResult.getErrorMessage());
                 return createErrorResponse(HttpStatus.BAD_REQUEST, "Invalid input format");
             }
-            
+
             // Step 2: Generate hash with selected algorithm
             String hashResult = hashService.computeHash(studentName, DEFAULT_ALGORITHM);
-            
+
             // Step 3: Format response for display
             String htmlResponse = responseFormatter.formatHashResponse(
                 studentName, DEFAULT_ALGORITHM, hashResult);
-            
+
             // Step 4: Log successful operation (without sensitive data)
             log.info("Hash generated successfully for input length: {}", studentName.length());
-            
+
             return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_HTML)
                 .body(htmlResponse);
-                
+
         } catch (SecurityException secEx) {
             log.error("Security violation during hash generation", secEx);
             return createErrorResponse(HttpStatus.FORBIDDEN, "Security policy violation");
-            
+
         } catch (CryptographicException cryptoEx) {
             log.error("Cryptographic operation failed", cryptoEx);
             return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Hash generation failed");
-            
+
         } catch (Exception unexpectedEx) {
             log.error("Unexpected error during hash generation", unexpectedEx);
             return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         }
     }
-    
+
     /**
      * Creates standardized error response without exposing sensitive information.
      */
@@ -486,21 +486,21 @@ public class HashController {
  */
 @UtilityClass
 public final class CryptographicUtils {
-    
+
     // Pre-computed hex lookup table for performance optimization
     private static final char[] HEX_CHARS = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
     };
-    
+
     // Thread-safe algorithm cache to avoid repeated MessageDigest creation
-    private static final ConcurrentHashMap<String, Supplier<MessageDigest>> ALGORITHM_CACHE = 
+    private static final ConcurrentHashMap<String, Supplier<MessageDigest>> ALGORITHM_CACHE =
         new ConcurrentHashMap<>();
-    
+
     /**
      * Converts byte array to hexadecimal string with optimal performance.
      * Uses pre-computed lookup table and StringBuilder for efficiency.
-     * 
+     *
      * @param bytes input byte array
      * @return hexadecimal string representation
      * @throws IllegalArgumentException if bytes is null
@@ -509,20 +509,20 @@ public final class CryptographicUtils {
         if (bytes.length == 0) {
             return "";
         }
-        
+
         // Pre-size StringBuilder to exact capacity needed
         StringBuilder hexString = new StringBuilder(bytes.length * 2);
-        
+
         // Use bit operations for optimal performance
         for (byte b : bytes) {
             int unsigned = b & 0xFF;
             hexString.append(HEX_CHARS[unsigned >>> 4])    // High nibble
                      .append(HEX_CHARS[unsigned & 0x0F]);  // Low nibble
         }
-        
+
         return hexString.toString();
     }
-    
+
     /**
      * Creates MessageDigest instance with caching for performance.
      * Thread-safe implementation using supplier pattern.
@@ -536,7 +536,7 @@ public final class CryptographicUtils {
             }
         }).get();
     }
-    
+
     /**
      * Secure string-to-bytes conversion with explicit encoding.
      * Prevents platform-dependent encoding issues.
@@ -544,7 +544,7 @@ public final class CryptographicUtils {
     public static byte[] stringToBytes(@NonNull String input) {
         return input.getBytes(StandardCharsets.UTF_8);
     }
-    
+
     /**
      * Clears sensitive byte arrays after use (security best practice).
      * Overwrites memory to prevent data recovery.
@@ -566,7 +566,7 @@ public final class CryptographicUtils {
 @Component
 @Slf4j
 public class SecureErrorHandler {
-    
+
     // Generic error messages for external users (no technical details)
     private static final Map<Class<? extends Exception>, String> USER_ERROR_MESSAGES = Map.of(
         SecurityException.class, "Access denied due to security policy",
@@ -574,7 +574,7 @@ public class SecureErrorHandler {
         CryptographicException.class, "Processing request failed",
         RuntimeException.class, "An unexpected error occurred"
     );
-    
+
     /**
      * Handles exceptions securely by logging technical details internally
      * while providing safe, generic messages to external users.
@@ -582,13 +582,13 @@ public class SecureErrorHandler {
     public ErrorResponse handleSecurely(Exception exception, String operationContext) {
         // Log full technical details for developers (internal only)
         String errorId = UUID.randomUUID().toString();
-        log.error("Error ID [{}] in operation [{}]: {}", 
+        log.error("Error ID [{}] in operation [{}]: {}",
             errorId, operationContext, exception.getMessage(), exception);
-        
+
         // Determine safe user message (no technical details exposed)
         String userMessage = USER_ERROR_MESSAGES.getOrDefault(
             exception.getClass(), "An error occurred while processing your request");
-        
+
         // Return sanitized error response
         return ErrorResponse.builder()
             .errorId(errorId)              // For support reference
@@ -609,14 +609,14 @@ public class SecureErrorHandler {
 @Component
 @Slf4j
 public class SecurityInputValidator implements IInputValidator {
-    
+
     // Security constraints
     private static final int MAX_INPUT_LENGTH = 1000;
     private static final int MIN_INPUT_LENGTH = 1;
     private static final Pattern ALLOWED_CHARACTERS = Pattern.compile("^[a-zA-Z0-9\\s\\-_\\.]+$");
     private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
         "(?i)(union|select|insert|update|delete|drop|create|alter|exec|script)");
-    
+
     @Override
     public ValidationResult validate(@NonNull String input) {
         try {
@@ -624,47 +624,47 @@ public class SecurityInputValidator implements IInputValidator {
             if (StringUtils.isBlank(input)) {
                 return ValidationResult.invalid("Input cannot be empty");
             }
-            
+
             if (input.length() > MAX_INPUT_LENGTH) {
                 return ValidationResult.invalid("Input exceeds maximum length");
             }
-            
+
             if (input.length() < MIN_INPUT_LENGTH) {
                 return ValidationResult.invalid("Input below minimum length");
             }
-            
+
             // Step 2: Character set validation
             if (!ALLOWED_CHARACTERS.matcher(input).matches()) {
                 log.warn("Invalid characters detected in input");
                 return ValidationResult.invalid("Input contains invalid characters");
             }
-            
+
             // Step 3: Security threat detection
             if (SQL_INJECTION_PATTERN.matcher(input).find()) {
                 log.warn("Potential SQL injection attempt detected");
                 return ValidationResult.invalid("Input contains prohibited content");
             }
-            
+
             // Step 4: Business logic validation (name format)
             if (!isValidNameFormat(input)) {
                 return ValidationResult.invalid("Input does not match expected name format");
             }
-            
+
             return ValidationResult.valid();
-            
+
         } catch (Exception e) {
             log.error("Validation process failed for input", e);
             return ValidationResult.invalid("Validation process failed");
         }
     }
-    
+
     @Override
     public String sanitize(@NonNull String input) {
         return input.trim()                    // Remove leading/trailing whitespace
                    .replaceAll("\\s+", " ")    // Normalize multiple spaces
                    .toLowerCase();             // Normalize case for consistency
     }
-    
+
     private boolean isValidNameFormat(String input) {
         String[] parts = input.trim().split("\\s+");
         return parts.length >= 2 && parts.length <= 4; // First name + Last name (+ optional middle/suffix)
@@ -679,32 +679,32 @@ flowchart LR
     subgraph "Input Stage"
         A[Student Name Input<br/>Rick Smith]
     end
-    
+
     subgraph "Encoding Stage"
         B[UTF-8 Encoding<br/>String → byte[]]
     end
-    
+
     subgraph "Cryptographic Stage"
         C[Hash Generation<br/>MessageDigest.digest]
     end
-    
+
     subgraph "Formatting Stage"
         D[Hex Conversion<br/>byte[] → String]
     end
-    
+
     subgraph "Response Stage"
         E[HTML Response<br/>Formatted Output]
     end
-    
+
     A --> B
     B --> C
     C --> D
     D --> E
-    
+
     classDef inputStyle fill:#e1f5fe
     classDef processStyle fill:#f3e5f5
     classDef outputStyle fill:#e8f5e8
-    
+
     class A inputStyle
     class B,C,D processStyle
     class E outputStyle
@@ -895,21 +895,21 @@ graph TB
             Maven[Maven 3.6+<br/>Build Tool]
             IDE[Eclipse IDE<br/>Development Environment]
         end
-        
+
         subgraph "Project Structure"
             Source[Source Code<br/>src/main/java]
             Resources[Resources<br/>keystore.p12<br/>application.properties]
             Tests[Test Code<br/>src/test/java]
         end
-        
+
         subgraph "Runtime Environment"
             SpringBoot[Spring Boot App<br/>Embedded Tomcat<br/>Port 8443]
             SSL_Runtime[SSL/TLS Layer<br/>Certificate Loading<br/>HTTPS Encryption]
         end
     end
-    
+
     Browser[Web Browser<br/>HTTPS Client] -->|Port 8443| SSL_Runtime
-    
+
     IDE --> Source
     IDE --> Resources
     Maven --> Source
@@ -917,12 +917,12 @@ graph TB
     Java --> SpringBoot
     SpringBoot --> SSL_Runtime
     Resources --> SSL_Runtime
-    
+
     classDef devTools fill:#e3f2fd
     classDef projectFiles fill:#f3e5f5
     classDef runtime fill:#e8f5e8
     classDef external fill:#fff3e0
-    
+
     class Java,Maven,IDE devTools
     class Source,Resources,Tests projectFiles
     class SpringBoot,SSL_Runtime runtime
@@ -941,7 +941,7 @@ sequenceDiagram
 
     Dev->>+Maven: ./mvnw clean compile
     Maven-->>-Dev: Compilation Success
-    
+
     Dev->>+Maven: ./mvnw spring-boot:run
     Maven->>+Java: Start JVM
     Java->>+App: Load Application
@@ -951,7 +951,7 @@ sequenceDiagram
     App-->>-Java: Server Ready (Port 8443)
     Java-->>-Maven: Application Started
     Maven-->>-Dev: Server Running
-    
+
     Dev->>+Browser: Navigate to https://localhost:8443/hash
     Browser->>+App: HTTPS GET /hash
     App->>App: Generate Hash
