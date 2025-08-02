@@ -26,15 +26,16 @@ public class ValidationResult {
      * 
      * @param valid Whether the validation passed
      * @param sanitizedData The sanitized/cleaned data (null if validation failed)
-     * @param errors List of error messages
-     * @param warnings List of warning messages
+     * @param errors List of error messages (must be immutable)
+     * @param warnings List of warning messages (must be immutable)
      */
     private ValidationResult(boolean valid, String sanitizedData, 
                            List<String> errors, List<String> warnings) {
         this.valid = valid;
         this.sanitizedData = sanitizedData;
-        this.errors = Collections.unmodifiableList(new ArrayList<>(errors));
-        this.warnings = Collections.unmodifiableList(new ArrayList<>(warnings));
+        // No defensive copying needed since we control the inputs and ensure they're immutable
+        this.errors = errors;
+        this.warnings = warnings;
     }
     
     /**
@@ -99,7 +100,7 @@ public class ValidationResult {
      * @return ValidationResult indicating success
      */
     public static ValidationResult success(String sanitizedData) {
-        return new ValidationResult(true, sanitizedData, List.of(), List.of());
+        return new ValidationResult(true, sanitizedData, Collections.<String>emptyList(), Collections.<String>emptyList());
     }
     
     /**
@@ -110,7 +111,8 @@ public class ValidationResult {
      * @return ValidationResult indicating success with warnings
      */
     public static ValidationResult successWithWarnings(String sanitizedData, List<String> warnings) {
-        return new ValidationResult(true, sanitizedData, List.of(), warnings);
+        return new ValidationResult(true, sanitizedData, Collections.<String>emptyList(), 
+                                  Collections.unmodifiableList(new ArrayList<String>(warnings)));
     }
     
     /**
@@ -120,7 +122,9 @@ public class ValidationResult {
      * @return ValidationResult indicating failure
      */
     public static ValidationResult failure(List<String> errors) {
-        return new ValidationResult(false, null, errors, List.of());
+        return new ValidationResult(false, null, 
+                                  Collections.unmodifiableList(new ArrayList<String>(errors)), 
+                                  Collections.<String>emptyList());
     }
     
     /**
@@ -130,7 +134,7 @@ public class ValidationResult {
      * @return ValidationResult indicating failure
      */
     public static ValidationResult failure(String error) {
-        return new ValidationResult(false, null, List.of(error), List.of());
+        return new ValidationResult(false, null, Collections.singletonList(error), Collections.<String>emptyList());
     }
     
     /**
@@ -141,7 +145,9 @@ public class ValidationResult {
      * @return ValidationResult indicating failure with additional warnings
      */
     public static ValidationResult failure(List<String> errors, List<String> warnings) {
-        return new ValidationResult(false, null, errors, warnings);
+        return new ValidationResult(false, null, 
+                                  Collections.unmodifiableList(new ArrayList<String>(errors)),
+                                  Collections.unmodifiableList(new ArrayList<String>(warnings)));
     }
     
     @Override

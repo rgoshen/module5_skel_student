@@ -26,7 +26,8 @@ public class HashResult {
      * @param algorithm The cryptographic algorithm used
      * @param hexHash The computed hash in hexadecimal format
      * @param timestamp When the hash was computed
-     * @param computationTimeMs Time taken to compute the hash in milliseconds
+     * @param computationTimeMs Time taken to compute the hash in milliseconds (must be non-negative)
+     * @throws IllegalArgumentException if computationTimeMs is negative
      */
     public HashResult(String originalData, String algorithm, String hexHash, 
                      Instant timestamp, long computationTimeMs) {
@@ -34,6 +35,10 @@ public class HashResult {
         this.algorithm = Objects.requireNonNull(algorithm, "Algorithm cannot be null");
         this.hexHash = Objects.requireNonNull(hexHash, "Hex hash cannot be null");
         this.timestamp = Objects.requireNonNull(timestamp, "Timestamp cannot be null");
+        
+        if (computationTimeMs < 0) {
+            throw new IllegalArgumentException("Computation time cannot be negative: " + computationTimeMs);
+        }
         this.computationTimeMs = computationTimeMs;
     }
     
@@ -143,6 +148,9 @@ public class HashResult {
         }
         
         public Builder computationTimeMs(long computationTimeMs) {
+            if (computationTimeMs < 0) {
+                throw new IllegalArgumentException("Computation time cannot be negative: " + computationTimeMs);
+            }
             this.computationTimeMs = computationTimeMs;
             return this;
         }
