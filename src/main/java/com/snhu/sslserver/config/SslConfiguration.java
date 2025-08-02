@@ -69,7 +69,7 @@ public class SslConfiguration {
 
       // Validate key alias exists
       if (!keyStore.containsAlias(keyAlias)) {
-        logger.error("SSL key alias '{}' not found in keystore", keyAlias);
+        logger.error("SSL key alias not found in keystore");
         return new SslValidationResult(false, "Key alias not found in keystore");
       }
 
@@ -79,7 +79,6 @@ public class SslConfiguration {
 
       logger.info("SSL/TLS configuration validation successful");
       logger.info("Keystore: {}", keyStoreResource.getDescription());
-      logger.info("Key alias: {}", keyAlias);
       logger.info("Keystore type: {}", keyStoreType);
 
       return new SslValidationResult(true, "SSL configuration valid");
