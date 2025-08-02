@@ -100,7 +100,7 @@ public class ValidationResult {
      * @return ValidationResult indicating success
      */
     public static ValidationResult success(String sanitizedData) {
-        return new ValidationResult(true, sanitizedData, Collections.<String>emptyList(), Collections.<String>emptyList());
+        return new ValidationResult(true, sanitizedData, Collections.emptyList(), Collections.emptyList());
     }
     
     /**
@@ -111,7 +111,7 @@ public class ValidationResult {
      * @return ValidationResult indicating success with warnings
      */
     public static ValidationResult successWithWarnings(String sanitizedData, List<String> warnings) {
-        return new ValidationResult(true, sanitizedData, Collections.<String>emptyList(), 
+        return new ValidationResult(true, sanitizedData, Collections.emptyList(), 
                                   Collections.unmodifiableList(new ArrayList<String>(warnings)));
     }
     
@@ -124,7 +124,7 @@ public class ValidationResult {
     public static ValidationResult failure(List<String> errors) {
         return new ValidationResult(false, null, 
                                   Collections.unmodifiableList(new ArrayList<String>(errors)), 
-                                  Collections.<String>emptyList());
+                                  Collections.emptyList());
     }
     
     /**
@@ -134,7 +134,7 @@ public class ValidationResult {
      * @return ValidationResult indicating failure
      */
     public static ValidationResult failure(String error) {
-        return new ValidationResult(false, null, Collections.singletonList(error), Collections.<String>emptyList());
+        return new ValidationResult(false, null, Collections.singletonList(error), Collections.emptyList());
     }
     
     /**
