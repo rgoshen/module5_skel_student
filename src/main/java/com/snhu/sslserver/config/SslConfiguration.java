@@ -39,16 +39,16 @@ public class SslConfiguration {
   private static final Logger logger = LoggerFactory.getLogger(SslConfiguration.class);
 
   @Value("${server.ssl.key-store}")
-  private Resource keyStoreResource;
+  private Resource certificateStoreResource;
 
   @Value("${server.ssl.key-store-password}")
-  private String keyStorePassword;
+  private String certificateStorePassword;
 
   @Value("${server.ssl.key-store-type}")
-  private String keyStoreType;
+  private String certificateStoreType;
 
   @Value("${server.ssl.key-alias}")
-  private String keyAlias;
+  private String certificateAlias;
 
   /**
    * Validates SSL configuration at startup to ensure proper keystore setup. Throws an exception if
@@ -59,9 +59,9 @@ public class SslConfiguration {
     logger.info("Validating SSL/TLS configuration for HTTPS-only operation");
 
     try {
-      KeyStore keyStore = loadKeyStore();
-      validateKeyAlias(keyStore);
-      validateSslContext(keyStore);
+      KeyStore certStore = loadCertificateStore();
+      validateCertificateAlias(certStore);
+      validateSslContext(certStore);
       logValidationSuccess();
     } catch (Exception e) {
       logger.error("SSL/TLS configuration validation failed", e);
@@ -70,55 +70,55 @@ public class SslConfiguration {
   }
 
   /**
-   * Loads and validates the SSL keystore.
+   * Loads and validates the SSL certificate store.
    *
-   * @return The loaded keystore
-   * @throws Exception if keystore cannot be loaded
+   * @return The loaded certificate store
+   * @throws Exception if certificate store cannot be loaded
    */
-  private KeyStore loadKeyStore() throws Exception {
-    if (!keyStoreResource.exists()) {
+  private KeyStore loadCertificateStore() throws Exception {
+    if (!certificateStoreResource.exists()) {
       throw new IllegalStateException(
-          "Keystore file not found: " + keyStoreResource.getDescription());
+          "Certificate store file not found: " + certificateStoreResource.getDescription());
     }
 
-    KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-    try (InputStream inputStream = keyStoreResource.getInputStream()) {
-      keyStore.load(inputStream, keyStorePassword.toCharArray());
+    KeyStore certStore = KeyStore.getInstance(certificateStoreType);
+    try (InputStream inputStream = certificateStoreResource.getInputStream()) {
+      certStore.load(inputStream, certificateStorePassword.toCharArray());
     }
-    return keyStore;
+    return certStore;
   }
 
   /**
-   * Validates that the required key alias exists in the keystore.
+   * Validates that the required certificate alias exists in the certificate store.
    *
-   * @param keyStore The loaded keystore
-   * @throws Exception if key alias is not found
+   * @param certStore The loaded certificate store
+   * @throws Exception if certificate alias is not found
    */
-  private void validateKeyAlias(KeyStore keyStore) throws Exception {
-    if (!keyStore.containsAlias(keyAlias)) {
-      throw new IllegalStateException("SSL key alias not found in keystore");
+  private void validateCertificateAlias(KeyStore certStore) throws Exception {
+    if (!certStore.containsAlias(certificateAlias)) {
+      throw new IllegalStateException("SSL certificate alias not found in certificate store");
     }
   }
 
   /**
-   * Validates SSL context creation using the actual keystore.
+   * Validates SSL context creation using the actual certificate store.
    *
-   * @param keyStore The loaded keystore
+   * @param certStore The loaded certificate store
    * @throws Exception if SSL context cannot be created
    */
-  private void validateSslContext(KeyStore keyStore) throws Exception {
-    // Initialize KeyManagerFactory with the keystore and password
+  private void validateSslContext(KeyStore certStore) throws Exception {
+    // Initialize KeyManagerFactory with the certificate store and password
     KeyManagerFactory keyManagerFactory =
         KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+    keyManagerFactory.init(certStore, certificateStorePassword.toCharArray());
 
-    // Initialize TrustManagerFactory with the keystore
+    // Initialize TrustManagerFactory with the certificate store
     TrustManagerFactory trustManagerFactory =
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    trustManagerFactory.init(keyStore);
+    trustManagerFactory.init(certStore);
 
-    // Initialize SSLContext with KeyManagers and TrustManagers to properly validate keystore
-    // integration
+    // Initialize SSLContext with KeyManagers and TrustManagers to properly validate certificate
+    // store integration
     SSLContext sslContext = SSLContext.getInstance("TLS");
     sslContext.init(
         keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
@@ -127,8 +127,8 @@ public class SslConfiguration {
   /** Logs successful SSL configuration validation. */
   private void logValidationSuccess() {
     logger.info("SSL/TLS configuration validation successful");
-    String storeLocation = keyStoreResource.getDescription();
-    String storeFormat = keyStoreType;
+    String storeLocation = certificateStoreResource.getDescription();
+    String storeFormat = certificateStoreType;
     logger.info("SSL certificate store: {}", storeLocation);
     logger.info("SSL certificate store type: {}", storeFormat);
   }
