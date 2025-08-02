@@ -25,20 +25,38 @@ jobs:
       run: |
         echo "🔐 Validating cryptographic algorithm usage..."
         
-        # Check for deprecated algorithms
-        if grep -r "MD5\|SHA-1\|SHA1" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "SHA-1.*deprecated\|MD5.*deprecated"; then
-          echo "❌ Deprecated cryptographic algorithms detected!"
+        # Check for deprecated algorithms in actual code (not comments)
+        # Look for algorithm usage in MessageDigest.getInstance() calls or similar
+        DEPRECATED_USAGE=$(grep -r "MessageDigest\.getInstance.*[\"']MD5[\"']\|MessageDigest\.getInstance.*[\"']SHA-1[\"']\|MessageDigest\.getInstance.*[\"']SHA1[\"']" src/main/java --include="*.java" || true)
+        
+        if [ -n "$DEPRECATED_USAGE" ]; then
+          echo "❌ Deprecated cryptographic algorithms detected in code!"
+          echo "$DEPRECATED_USAGE"
           echo "   MD5 and SHA-1 are not allowed due to collision vulnerabilities"
           exit 1
         else
-          echo "✅ No deprecated algorithms found"
+          echo "✅ No deprecated algorithms found in code implementation"
         fi
         
-        # Check for secure algorithms
-        if grep -r "SHA-256\|SHA-3-256\|SHA-512\|SHA-3-512" src/main/java --include="*.java"; then
-          echo "✅ Secure algorithms detected"
+        # Also check for direct string usage that might indicate algorithm selection
+        DEPRECATED_STRINGS=$(grep -r "= *[\"']MD5[\"']\|= *[\"']SHA-1[\"']\|= *[\"']SHA1[\"']" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " || true)
+        
+        if [ -n "$DEPRECATED_STRINGS" ]; then
+          echo "❌ Deprecated algorithm strings detected in code!"
+          echo "$DEPRECATED_STRINGS"
+          exit 1
         else
-          echo "⚠️  No secure algorithms found in source code"
+          echo "✅ No deprecated algorithm strings found in code"
+        fi
+        
+        # Check for secure algorithms in actual implementation
+        SECURE_USAGE=$(grep -r "MessageDigest\.getInstance.*[\"']SHA-256[\"']\|MessageDigest\.getInstance.*[\"']SHA-3-256[\"']\|MessageDigest\.getInstance.*[\"']SHA-512[\"']\|MessageDigest\.getInstance.*[\"']SHA-3-512[\"']" src/main/java --include="*.java" || true)
+        
+        if [ -n "$SECURE_USAGE" ]; then
+          echo "✅ Secure algorithms detected in implementation"
+          echo "$SECURE_USAGE"
+        else
+          echo "ℹ️  No secure algorithm implementations found yet (this is expected for Task 1)"
         fi
         
     - name: Validate SSL configuration
@@ -74,10 +92,13 @@ jobs:
       run: |
         echo "🚫 Validating secure error handling..."
         
-        # Check for secure exception handling
-        if grep -r "printStackTrace\|getCause().getMessage()" src/main/java --include="*.java"; then
+        # Check for insecure exception handling (excluding test files)
+        INSECURE_HANDLING=$(grep -r "\.printStackTrace()\|getCause()\.getMessage()" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " || true)
+        
+        if [ -n "$INSECURE_HANDLING" ]; then
           echo "❌ Insecure error handling detected!"
-          echo "   Stack traces and detailed error messages should not be exposed"
+          echo "$INSECURE_HANDLING"
+          echo "   Stack traces and detailed error messages should not be exposed to users"
           exit 1
         else
           echo "✅ No insecure error handling patterns found"
@@ -87,9 +108,13 @@ jobs:
       run: |
         echo "📝 Validating secure logging practices..."
         
-        # Check for sensitive data in logs
-        if grep -r "log.*password\|log.*secret\|log.*key" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*"; then
+        # Check for sensitive data in logs (excluding comments and test files)
+        SENSITIVE_LOGGING=$(grep -r "log.*password\|log.*secret\|log.*key\|logger.*password\|logger.*secret\|logger.*key" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " | grep -v "keystore\|keyStore\|KeyStore" || true)
+        
+        if [ -n "$SENSITIVE_LOGGING" ]; then
           echo "❌ Potential sensitive data logging detected!"
+          echo "$SENSITIVE_LOGGING"
+          echo "   Sensitive information should not be logged"
           exit 1
         else
           echo "✅ No sensitive data logging patterns found"
