@@ -14,7 +14,7 @@ import com.snhu.sslserver.model.ValidationResult;
  * - Proper encoding validation
  * - Algorithm security validation
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public interface IInputValidator {

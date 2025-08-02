@@ -5,7 +5,7 @@ package com.snhu.sslserver.exception;
  * This exception provides structured error handling with error codes and user-friendly messages
  * while maintaining security by not exposing sensitive internal details.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public class CryptographicException extends Exception {

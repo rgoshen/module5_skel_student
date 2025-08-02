@@ -11,7 +11,7 @@ import java.util.Set;
  * This class provides metadata about hash algorithms including security status,
  * performance characteristics, and descriptive information.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public class AlgorithmInfo {

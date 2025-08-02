@@ -10,34 +10,35 @@ import java.util.Objects;
  * This class encapsulates validation status, sanitized data, and any error
  * or warning messages generated during validation.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public class ValidationResult {
-    
+
     private final boolean valid;
     private final String sanitizedData;
     private final List<String> errors;
     private final List<String> warnings;
-    
+
     /**
      * Private constructor for creating ValidationResult instances.
      * Use static factory methods for construction.
      * 
-     * @param valid Whether the validation passed
+     * @param valid         Whether the validation passed
      * @param sanitizedData The sanitized/cleaned data (null if validation failed)
-     * @param errors List of error messages (must be immutable)
-     * @param warnings List of warning messages (must be immutable)
+     * @param errors        List of error messages (must be immutable)
+     * @param warnings      List of warning messages (must be immutable)
      */
-    private ValidationResult(boolean valid, String sanitizedData, 
-                           List<String> errors, List<String> warnings) {
+    private ValidationResult(boolean valid, String sanitizedData,
+            List<String> errors, List<String> warnings) {
         this.valid = valid;
         this.sanitizedData = sanitizedData;
-        // No defensive copying needed since we control the inputs and ensure they're immutable
+        // No defensive copying needed since we control the inputs and ensure they're
+        // immutable
         this.errors = errors;
         this.warnings = warnings;
     }
-    
+
     /**
      * Indicates if the validation was successful.
      * 
@@ -46,7 +47,7 @@ public class ValidationResult {
     public boolean isValid() {
         return valid;
     }
-    
+
     /**
      * Gets the sanitized data after validation processing.
      * This may be null if validation failed.
@@ -56,7 +57,7 @@ public class ValidationResult {
     public String getSanitizedData() {
         return sanitizedData;
     }
-    
+
     /**
      * Gets the list of error messages from validation.
      * 
@@ -65,7 +66,7 @@ public class ValidationResult {
     public List<String> getErrors() {
         return errors;
     }
-    
+
     /**
      * Gets the list of warning messages from validation.
      * 
@@ -74,7 +75,7 @@ public class ValidationResult {
     public List<String> getWarnings() {
         return warnings;
     }
-    
+
     /**
      * Indicates if there are any error messages.
      * 
@@ -83,7 +84,7 @@ public class ValidationResult {
     public boolean hasErrors() {
         return !errors.isEmpty();
     }
-    
+
     /**
      * Indicates if there are any warning messages.
      * 
@@ -92,7 +93,7 @@ public class ValidationResult {
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
-    
+
     /**
      * Creates a successful validation result with sanitized data.
      * 
@@ -102,19 +103,19 @@ public class ValidationResult {
     public static ValidationResult success(String sanitizedData) {
         return new ValidationResult(true, sanitizedData, Collections.emptyList(), Collections.emptyList());
     }
-    
+
     /**
      * Creates a successful validation result with sanitized data and warnings.
      * 
      * @param sanitizedData The cleaned/validated data
-     * @param warnings List of warning messages
+     * @param warnings      List of warning messages
      * @return ValidationResult indicating success with warnings
      */
     public static ValidationResult successWithWarnings(String sanitizedData, List<String> warnings) {
-        return new ValidationResult(true, sanitizedData, Collections.emptyList(), 
-                                  Collections.unmodifiableList(new ArrayList<String>(warnings)));
+        return new ValidationResult(true, sanitizedData, Collections.emptyList(),
+                Collections.unmodifiableList(new ArrayList<String>(warnings)));
     }
-    
+
     /**
      * Creates a failed validation result with error messages.
      * 
@@ -122,11 +123,11 @@ public class ValidationResult {
      * @return ValidationResult indicating failure
      */
     public static ValidationResult failure(List<String> errors) {
-        return new ValidationResult(false, null, 
-                                  Collections.unmodifiableList(new ArrayList<String>(errors)), 
-                                  Collections.emptyList());
+        return new ValidationResult(false, null,
+                Collections.unmodifiableList(new ArrayList<String>(errors)),
+                Collections.emptyList());
     }
-    
+
     /**
      * Creates a failed validation result with a single error message.
      * 
@@ -136,44 +137,46 @@ public class ValidationResult {
     public static ValidationResult failure(String error) {
         return new ValidationResult(false, null, Collections.singletonList(error), Collections.emptyList());
     }
-    
+
     /**
      * Creates a failed validation result with errors and warnings.
      * 
-     * @param errors List of error messages
+     * @param errors   List of error messages
      * @param warnings List of warning messages
      * @return ValidationResult indicating failure with additional warnings
      */
     public static ValidationResult failure(List<String> errors, List<String> warnings) {
-        return new ValidationResult(false, null, 
-                                  Collections.unmodifiableList(new ArrayList<String>(errors)),
-                                  Collections.unmodifiableList(new ArrayList<String>(warnings)));
+        return new ValidationResult(false, null,
+                Collections.unmodifiableList(new ArrayList<String>(errors)),
+                Collections.unmodifiableList(new ArrayList<String>(warnings)));
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+
         ValidationResult that = (ValidationResult) obj;
         return valid == that.valid &&
-               Objects.equals(sanitizedData, that.sanitizedData) &&
-               Objects.equals(errors, that.errors) &&
-               Objects.equals(warnings, that.warnings);
+                Objects.equals(sanitizedData, that.sanitizedData) &&
+                Objects.equals(errors, that.errors) &&
+                Objects.equals(warnings, that.warnings);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(valid, sanitizedData, errors, warnings);
     }
-    
+
     @Override
     public String toString() {
         return "ValidationResult{" +
-               "valid=" + valid +
-               ", sanitizedData='" + sanitizedData + '\'' +
-               ", errors=" + errors +
-               ", warnings=" + warnings +
-               '}';
+                "valid=" + valid +
+                ", sanitizedData='" + sanitizedData + '\'' +
+                ", errors=" + errors +
+                ", warnings=" + warnings +
+                '}';
     }
 }

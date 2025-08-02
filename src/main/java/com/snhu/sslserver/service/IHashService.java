@@ -1,10 +1,10 @@
 package com.snhu.sslserver.service;
 
-import com.snhu.sslserver.exception.CryptographicException;
-import com.snhu.sslserver.model.HashResult;
-import com.snhu.sslserver.model.AlgorithmInfo;
-
 import java.util.List;
+
+import com.snhu.sslserver.exception.CryptographicException;
+import com.snhu.sslserver.model.AlgorithmInfo;
+import com.snhu.sslserver.model.HashResult;
 
 /**
  * Service interface for cryptographic hash operations.
@@ -17,7 +17,7 @@ import java.util.List;
  * - Proper error handling without information leakage
  * - Thread-safe operations for concurrent access
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public interface IHashService {

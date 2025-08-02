@@ -5,7 +5,7 @@ package com.snhu.sslserver.model;
  * This rating helps users understand the trade-offs between security and performance
  * when selecting hash algorithms.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public enum PerformanceRating {

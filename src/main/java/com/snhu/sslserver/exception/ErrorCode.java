@@ -5,7 +5,7 @@ package com.snhu.sslserver.exception;
  * These codes provide structured error categorization while maintaining
  * security by not exposing sensitive implementation details.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public enum ErrorCode {

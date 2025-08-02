@@ -8,7 +8,7 @@ import java.util.Objects;
  * This class encapsulates all relevant information about a hash operation
  * including the original data, algorithm used, computed hash, and metadata.
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public class HashResult {

@@ -16,7 +16,7 @@ import com.snhu.sslserver.exception.CryptographicException;
  * - Efficient byte-to-hex conversion
  * - Thread-safe operations
  * 
- * @author CS305 Student
+ * @author Rick Goshen
  * @version 1.0
  */
 public interface ICryptographicProvider {
