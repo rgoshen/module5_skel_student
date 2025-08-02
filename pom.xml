@@ -63,7 +63,7 @@
 						
 						<!-- Use Google Java Format -->
 						<googleJavaFormat>
-							<version>1.15.0</version>
+							<version>1.7</version>
 							<style>GOOGLE</style>
 						</googleJavaFormat>
 						
