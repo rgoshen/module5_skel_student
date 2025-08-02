@@ -26,7 +26,7 @@ import org.springframework.core.io.Resource;
  *   <li>HTTPS-only operation on port 8443
  *   <li>TLS 1.2 and 1.3 protocol support
  *   <li>Secure cipher suite configuration
- *   <li>PKCS12 keystore integration
+ *   <li>PKCS12 certificate store integration
  *   <li>SSL error handling and validation
  * </ul>
  *
@@ -51,8 +51,8 @@ public class SslConfiguration {
   private String certificateAlias;
 
   /**
-   * Validates SSL configuration at startup to ensure proper keystore setup. Throws an exception if
-   * validation fails to prevent startup with invalid SSL configuration.
+   * Validates SSL configuration at startup to ensure proper certificate store setup. Throws an
+   * exception if validation fails to prevent startup with invalid SSL configuration.
    */
   @Bean
   public void validateSslConfiguration() {
@@ -107,21 +107,21 @@ public class SslConfiguration {
    * @throws Exception if SSL context cannot be created
    */
   private void validateSslContext(KeyStore certStore) throws Exception {
-    // Initialize KeyManagerFactory with the certificate store and password
-    KeyManagerFactory keyManagerFactory =
+    // Initialize CertManagerFactory with the certificate store and password
+    KeyManagerFactory certManagerFactory =
         KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    keyManagerFactory.init(certStore, certificateStorePassword.toCharArray());
+    certManagerFactory.init(certStore, certificateStorePassword.toCharArray());
 
     // Initialize TrustManagerFactory with the certificate store
     TrustManagerFactory trustManagerFactory =
         TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
     trustManagerFactory.init(certStore);
 
-    // Initialize SSLContext with KeyManagers and TrustManagers to properly validate certificate
+    // Initialize SSLContext with CertManagers and TrustManagers to properly validate certificate
     // store integration
     SSLContext sslContext = SSLContext.getInstance("TLS");
     sslContext.init(
-        keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+        certManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
   }
 
   /** Logs successful SSL configuration validation. */

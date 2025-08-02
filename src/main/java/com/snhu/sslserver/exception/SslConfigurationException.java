@@ -2,8 +2,8 @@ package com.snhu.sslserver.exception;
 
 /**
  * Exception thrown when SSL/TLS configuration issues are detected. This exception is used to handle
- * SSL-specific errors such as keystore loading failures, certificate validation issues, or TLS
- * protocol configuration problems.
+ * SSL-specific errors such as certificate store loading failures, certificate validation issues, or
+ * TLS protocol configuration problems.
  *
  * <p>This exception supports the secure error handling requirements for the CS305 Module Five
  * checksum verification system by providing structured error information for SSL-related issues.
@@ -15,8 +15,8 @@ public class SslConfigurationException extends RuntimeException {
 
   /** SSL error types for categorizing different SSL configuration issues. */
   public enum SslErrorType {
-    KEYSTORE_NOT_FOUND("SSL keystore file not found"),
-    KEYSTORE_LOAD_FAILED("Failed to load SSL keystore"),
+    CERTSTORE_NOT_FOUND("SSL certificate store file not found"),
+    CERTSTORE_LOAD_FAILED("Failed to load SSL certificate store"),
     CERTIFICATE_INVALID("SSL certificate validation failed"),
     PROTOCOL_UNSUPPORTED("SSL/TLS protocol not supported"),
     CIPHER_SUITE_INVALID("Invalid cipher suite configuration"),
@@ -85,8 +85,8 @@ public class SslConfigurationException extends RuntimeException {
    */
   public String getUserMessage() {
     switch (errorType) {
-      case KEYSTORE_NOT_FOUND:
-      case KEYSTORE_LOAD_FAILED:
+      case CERTSTORE_NOT_FOUND:
+      case CERTSTORE_LOAD_FAILED:
         return "SSL configuration error - please check system settings";
       case CERTIFICATE_INVALID:
         return "SSL certificate validation failed";
