@@ -1,5 +1,7 @@
 package com.snhu.sslserver.factory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +103,6 @@ public class HashAlgorithmFactory {
    * @return List of all available hash algorithm strategies
    */
   public List<HashAlgorithmStrategy> getAllStrategies() {
-    return List.copyOf(strategies.values());
+    return Collections.unmodifiableList(new ArrayList<>(strategies.values()));
   }
 }
