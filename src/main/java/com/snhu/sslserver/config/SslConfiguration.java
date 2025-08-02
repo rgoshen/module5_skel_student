@@ -41,7 +41,7 @@ public class SslConfiguration {
   @Value("${ssl.cert.store}")
   private Resource certificateStoreResource;
 
-  @Value("${ssl.cert.store.password}")
+  @Value("${ssl.cert.store.auth}")
   private String certificateStorePassword;
 
   @Value("${ssl.cert.store.type}")
