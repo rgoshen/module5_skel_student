@@ -24,15 +24,26 @@ jobs:
     - name: Validate PR Title
       run: |
         PR_TITLE="${{ github.event.pull_request.title }}"
-        # Check if PR title follows conventional commit format
-        if echo "$PR_TITLE" | grep -E "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+" > /dev/null; then
-          echo "✅ PR title follows conventional commit format"
-        else
-          echo "❌ PR title must follow format: type(scope): description"
-          echo "   Examples: feat: add hash validation, fix(tests): resolve null pointer exception"
-          echo "   Current title: $PR_TITLE"
-          exit 1
-        fi
+        echo "Validating PR title: $PR_TITLE"
+        
+        # Check if PR title starts with conventional commit type
+        case "$PR_TITLE" in
+          feat:*|fix:*|docs:*|style:*|refactor:*|test:*|chore:*)
+            echo "✅ PR title follows conventional commit format"
+            ;;
+          feat\(*|fix\(*|docs\(*|style\(*|refactor\(*|test\(*|chore\(*)
+            echo "✅ PR title follows conventional commit format with scope"
+            ;;
+          *)
+            echo "❌ PR title must follow format: type(scope): description"
+            echo "   Examples:"
+            echo "   - feat: add hash validation"
+            echo "   - fix(tests): resolve null pointer exception"
+            echo "   - docs: update README"
+            echo "   Current title: $PR_TITLE"
+            exit 1
+            ;;
+        esac
         
     - name: Check PR Description
       run: |
