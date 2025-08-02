@@ -164,15 +164,13 @@ public class HashController {
    */
   private ResponseEntity<?> createHashResponse(HashResult result, String acceptHeader) {
     MediaType selectedType = determineContentType(acceptHeader);
-    
+
     if (MediaType.APPLICATION_JSON.equals(selectedType)) {
       return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_JSON)
           .body(createJsonResponse(result));
     } else {
-      return ResponseEntity.ok()
-          .contentType(MediaType.TEXT_HTML)
-          .body(createHtmlResponse(result));
+      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(createHtmlResponse(result));
     }
   }
 
@@ -183,13 +181,12 @@ public class HashController {
    * @param acceptHeader The Accept header for content negotiation
    * @return ResponseEntity with appropriate content type
    */
-  private ResponseEntity<?> createAlgorithmsResponse(List<AlgorithmInfo> algorithms, String acceptHeader) {
+  private ResponseEntity<?> createAlgorithmsResponse(
+      List<AlgorithmInfo> algorithms, String acceptHeader) {
     MediaType selectedType = determineContentType(acceptHeader);
-    
+
     if (MediaType.APPLICATION_JSON.equals(selectedType)) {
-      return ResponseEntity.ok()
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(algorithms);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(algorithms);
     } else {
       return ResponseEntity.ok()
           .contentType(MediaType.TEXT_HTML)
@@ -198,8 +195,8 @@ public class HashController {
   }
 
   /**
-   * Determines the appropriate content type based on Accept header.
-   * Uses proper MediaType parsing instead of simple string contains.
+   * Determines the appropriate content type based on Accept header. Uses proper MediaType parsing
+   * instead of simple string contains.
    *
    * @param acceptHeader The Accept header value
    * @return Selected MediaType (defaults to HTML)
@@ -207,24 +204,24 @@ public class HashController {
   private MediaType determineContentType(String acceptHeader) {
     try {
       List<MediaType> acceptedMediaTypes = MediaType.parseMediaTypes(acceptHeader);
-      
+
       // Check for JSON preference first
       for (MediaType mediaType : acceptedMediaTypes) {
         if (mediaType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
           return MediaType.APPLICATION_JSON;
         }
       }
-      
+
       // Check for HTML preference
       for (MediaType mediaType : acceptedMediaTypes) {
         if (mediaType.isCompatibleWith(MediaType.TEXT_HTML)) {
           return MediaType.TEXT_HTML;
         }
       }
-      
+
       // Default to HTML for any other case
       return MediaType.TEXT_HTML;
-      
+
     } catch (Exception e) {
       logger.debug("Error parsing Accept header '{}', defaulting to HTML", acceptHeader, e);
       return MediaType.TEXT_HTML;
@@ -338,7 +335,7 @@ public class HashController {
   private ResponseEntity<?> createErrorResponse(
       HttpStatus status, String message, String acceptHeader) {
     MediaType selectedType = determineContentType(acceptHeader);
-    
+
     if (MediaType.APPLICATION_JSON.equals(selectedType)) {
       ErrorResponseDto errorResponse = new ErrorResponseDto(status.value(), message);
       return ResponseEntity.status(status)
@@ -385,8 +382,8 @@ public class HashController {
   }
 
   /**
-   * Escapes HTML special characters to prevent XSS attacks.
-   * Improved to handle more edge cases and potential attack vectors.
+   * Escapes HTML special characters to prevent XSS attacks. Improved to handle more edge cases and
+   * potential attack vectors.
    *
    * @param text Text to escape
    * @return HTML-escaped text
@@ -395,14 +392,14 @@ public class HashController {
     if (text == null) {
       return "";
     }
-    return text.replace("&", "&amp;")   // Must be first to avoid double-escaping
+    return text.replace("&", "&amp;") // Must be first to avoid double-escaping
         .replace("<", "&lt;")
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
-        .replace("/", "&#x2F;")         // Forward slash for additional safety
-        .replace("`", "&#x60;")         // Backtick
-        .replace("=", "&#x3D;");        // Equals sign
+        .replace("/", "&#x2F;") // Forward slash for additional safety
+        .replace("`", "&#x60;") // Backtick
+        .replace("=", "&#x3D;"); // Equals sign
   }
 
   /**
@@ -413,10 +410,13 @@ public class HashController {
    * @return Error response
    */
   @ExceptionHandler(CryptographicException.class)
-  public ResponseEntity<?> handleCryptographicException(CryptographicException e, WebRequest request) {
+  public ResponseEntity<?> handleCryptographicException(
+      CryptographicException e, WebRequest request) {
     logger.warn("Cryptographic exception: {}", e.getUserMessage(), e);
     String acceptHeader = request.getHeader("Accept");
-    return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getUserMessage(), 
+    return createErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        e.getUserMessage(),
         acceptHeader != null ? acceptHeader : "text/html");
   }
 
@@ -432,7 +432,8 @@ public class HashController {
     logger.error("Unhandled exception caught in HashController", e);
     String acceptHeader = request.getHeader("Accept");
     return createErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", 
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "An unexpected error occurred",
         acceptHeader != null ? acceptHeader : "text/html");
   }
 
