@@ -38,16 +38,16 @@ public class SslConfiguration {
 
   private static final Logger logger = LoggerFactory.getLogger(SslConfiguration.class);
 
-  @Value("${server.ssl.key-store}")
+  @Value("${ssl.cert.store}")
   private Resource certificateStoreResource;
 
-  @Value("${server.ssl.key-store-password}")
+  @Value("${ssl.cert.store.password}")
   private String certificateStorePassword;
 
-  @Value("${server.ssl.key-store-type}")
+  @Value("${ssl.cert.store.type}")
   private String certificateStoreType;
 
-  @Value("${server.ssl.key-alias}")
+  @Value("${ssl.cert.alias}")
   private String certificateAlias;
 
   /**
