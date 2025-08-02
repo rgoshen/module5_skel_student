@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   test:
     name: Run Tests
@@ -36,12 +41,26 @@ jobs:
       run: mvn clean test
       
     - name: Generate test report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v1.9.1
       if: success() || failure()
       with:
         name: Maven Tests (Java ${{ matrix.java-version }})
         path: target/surefire-reports/*.xml
         reporter: java-junit
+        fail-on-error: false
+      continue-on-error: true
+      
+    - name: Test Summary (Fallback)
+      if: always()
+      run: |
+        echo "## Test Results Summary (Java ${{ matrix.java-version }})" >> $GITHUB_STEP_SUMMARY
+        if [ -d "target/surefire-reports" ]; then
+          echo "📊 Test reports generated in target/surefire-reports/" >> $GITHUB_STEP_SUMMARY
+          echo "📁 Test result files:" >> $GITHUB_STEP_SUMMARY
+          ls -la target/surefire-reports/ >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ No test reports found" >> $GITHUB_STEP_SUMMARY
+        fi
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
