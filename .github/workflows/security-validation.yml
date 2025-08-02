@@ -108,8 +108,8 @@ jobs:
       run: |
         echo "📝 Validating secure logging practices..."
         
-        # Check for sensitive data in logs (excluding comments and test files)
-        SENSITIVE_LOGGING=$(grep -r "log.*password\|log.*secret\|log.*key\|logger.*password\|logger.*secret\|logger.*key" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " | grep -v "keystore\|keyStore\|KeyStore" || true)
+        # Check for sensitive data in logs (excluding comments, test files, and @Value annotations)
+        SENSITIVE_LOGGING=$(grep -r "log.*password\|log.*secret\|log.*key\|logger.*password\|logger.*secret\|logger.*key" src/main/java --include="*.java" | grep -v "// " | grep -v "/\*" | grep -v "\* " | grep -v "keystore\|keyStore\|KeyStore" | grep -v "@Value" || true)
         
         if [ -n "$SENSITIVE_LOGGING" ]; then
           echo "❌ Potential sensitive data logging detected!"
