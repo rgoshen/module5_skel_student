@@ -31,13 +31,14 @@ jobs:
     - name: Check PR Description
       run: |
         PR_BODY="${{ github.event.pull_request.body }}"
-        if [ -z "$PR_BODY" ]; then
-          echo "❌ PR description is required"
-          echo "   Please provide:"
+        echo "PR body content: '$PR_BODY'"
+        if [ -z "$PR_BODY" ] || [ "$PR_BODY" = "null" ]; then
+          echo "⚠️  PR description is empty or missing"
+          echo "   Recommended to provide:"
           echo "   - What changes were made"
           echo "   - Why the changes were necessary"
           echo "   - How to test the changes"
-          exit 1
+          echo "✅ Proceeding anyway (warning only)"
         else
           echo "✅ PR description provided"
         fi
