@@ -6,7 +6,7 @@ inclusion: always
 
 ## Architectural Philosophy
 
-This project follows **Clean Architecture** principles with clear separation of concerns, implementing **SOLID principles** throughout. 
+This project follows **Clean Architecture** principles with clear separation of concerns, implementing **SOLID principles** throughout.
 
 ### ⚠️ **IMPORTANT: Implementation Strategy**
 
@@ -14,7 +14,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 
 **Implementation Phases**:
 1. **Phase 1**: Work with skeleton structure (`ServerApplication.java` with embedded controller)
-2. **Phase 2**: Extract service layer interfaces and implementations  
+2. **Phase 2**: Extract service layer interfaces and implementations
 3. **Phase 3**: Implement full professional architecture with proper separation
 
 The structure evolves from the educational skeleton to demonstrate professional development practices while meeting CS-305 assignment requirements.
@@ -177,11 +177,11 @@ public interface IHashService {
 @Slf4j
 public class HashServiceImpl implements IHashService {
     private final ICryptographicProvider cryptoProvider;
-    
+
     public HashServiceImpl(ICryptographicProvider cryptoProvider) {
         this.cryptoProvider = Objects.requireNonNull(cryptoProvider);
     }
-    
+
     @Override
     public String computeHash(String input, String algorithm) {
         // Implementation
@@ -197,16 +197,16 @@ public class HashServiceImpl implements IHashService {
 @Validated
 @Slf4j
 public class HashController {
-    
+
     private final IHashService hashService;
     private final IInputValidator validator;
-    
+
     // Constructor injection for dependencies
     public HashController(IHashService hashService, IInputValidator validator) {
         this.hashService = Objects.requireNonNull(hashService);
         this.validator = Objects.requireNonNull(validator);
     }
-    
+
     @GetMapping(value = "/hash", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> generateHash() {
         // HTTP-specific logic only
@@ -232,7 +232,7 @@ public class SHA256Strategy implements HashAlgorithmStrategy {
     }
 }
 
-@Component  
+@Component
 public class SHA3_256Strategy implements HashAlgorithmStrategy {
     @Override
     public String computeHash(String input) {
@@ -292,7 +292,7 @@ void shouldThrowSecurityExceptionForInsecureAlgorithm() { }
 # Server Configuration
 server.port=8443
 
-# SSL Configuration  
+# SSL Configuration
 server.ssl.key-alias=tomcat
 server.ssl.key-store-password=snhu4321
 server.ssl.key-store=classpath:keystore.p12

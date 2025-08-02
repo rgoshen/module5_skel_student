@@ -18,16 +18,16 @@ graph TB
     Service --> Validator[IInputValidator]
     Provider --> Strategy[HashAlgorithmStrategy]
     Strategy --> JCE[Java Cryptography Extension]
-    
+
     subgraph "Presentation Layer"
         Controller
     end
-    
+
     subgraph "Business Logic Layer"
         Service
         Validator
     end
-    
+
     subgraph "Infrastructure Layer"
         Provider
         Strategy
@@ -69,13 +69,13 @@ public interface IHashService {
      * @throws CryptographicException if hash computation fails
      */
     HashResult computeHash(String input, String algorithm) throws CryptographicException;
-    
+
     /**
      * Gets information about supported algorithms
      * @return List of supported algorithm information
      */
     List<AlgorithmInfo> getSupportedAlgorithms();
-    
+
     /**
      * Validates if an algorithm is secure and supported
      * @param algorithm Algorithm name to validate
@@ -96,14 +96,14 @@ public interface ICryptographicProvider {
      * @throws CryptographicException if algorithm is unsupported or insecure
      */
     MessageDigest createDigest(String algorithm) throws CryptographicException;
-    
+
     /**
      * Converts byte array to hexadecimal string representation
      * @param bytes Byte array to convert
      * @return Lowercase hexadecimal string
      */
     String bytesToHex(byte[] bytes);
-    
+
     /**
      * Gets list of secure, supported algorithms
      * @return Set of algorithm names that are cryptographically secure
@@ -123,19 +123,19 @@ public interface HashAlgorithmStrategy {
      * @throws CryptographicException if computation fails
      */
     byte[] computeHash(String input) throws CryptographicException;
-    
+
     /**
      * Gets the algorithm name for this strategy
      * @return Algorithm name (e.g., "SHA-256")
      */
     String getAlgorithmName();
-    
+
     /**
      * Indicates if this algorithm is cryptographically secure
      * @return true if algorithm is collision-resistant and secure
      */
     boolean isSecure();
-    
+
     /**
      * Gets performance characteristics of this algorithm
      * @return Performance rating (FAST, MEDIUM, SLOW)
@@ -154,7 +154,7 @@ public interface IInputValidator {
      * @return ValidationResult with sanitized data or error details
      */
     ValidationResult validateAndSanitize(String input);
-    
+
     /**
      * Validates algorithm name for security and support
      * @param algorithm Algorithm name to validate
@@ -172,15 +172,15 @@ public interface IInputValidator {
 @Validated
 @Slf4j
 public class HashController {
-    
+
     private final IHashService hashService;
     private final IInputValidator validator;
-    
+
     @GetMapping(value = "/hash", produces = {MediaType.TEXT_HTML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> generateHash(
             @RequestParam(defaultValue = "SHA-256") String algorithm,
             @RequestHeader(value = "Accept", defaultValue = "text/html") String acceptHeader) {
-        
+
         // Implementation handles content negotiation and response formatting
     }
 }
@@ -197,7 +197,7 @@ public class HashResult {
     private final String hexHash;
     private final Instant timestamp;
     private final long computationTimeMs;
-    
+
     // Constructor, getters, equals, hashCode, toString
 }
 ```
@@ -211,7 +211,7 @@ public class AlgorithmInfo {
     private final PerformanceRating performance;
     private final String description;
     private final Set<String> aliases;
-    
+
     // Constructor, getters, equals, hashCode, toString
 }
 ```
@@ -224,7 +224,7 @@ public class ValidationResult {
     private final String sanitizedData;
     private final List<String> errors;
     private final List<String> warnings;
-    
+
     // Static factory methods: success(), failure(), warning()
 }
 ```
@@ -235,7 +235,7 @@ public class ValidationResult {
 public class CryptographicException extends Exception {
     private final ErrorCode errorCode;
     private final String userMessage;
-    
+
     // Constructors with different error scenarios
 }
 
@@ -270,15 +270,15 @@ public class SecureAlgorithmValidator {
         "SHA-256", "SHA-384", "SHA-512",
         "SHA-3-256", "SHA-3-384", "SHA-3-512"
     );
-    
+
     private static final Set<String> DEPRECATED_ALGORITHMS = Set.of(
         "MD5", "SHA-1"
     );
-    
+
     public boolean isSecure(String algorithm) {
         return SECURE_ALGORITHMS.contains(algorithm.toUpperCase());
     }
-    
+
     public boolean isDeprecated(String algorithm) {
         return DEPRECATED_ALGORITHMS.contains(algorithm.toUpperCase());
     }
@@ -302,19 +302,19 @@ public class SecureAlgorithmValidator {
 
 ```java
 public class SecureErrorHandler {
-    
+
     public ResponseEntity<ErrorResponse> handleCryptographicException(CryptographicException e) {
         // Log detailed error for debugging (server-side only)
         String errorId = UUID.randomUUID().toString();
         log.error("Cryptographic operation failed [{}]: {}", errorId, e.getMessage(), e);
-        
+
         // Return generic error message to client
         ErrorResponse response = ErrorResponse.builder()
             .errorId(errorId)
             .message("Hash computation failed. Please check your input and try again.")
             .timestamp(Instant.now())
             .build();
-            
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
@@ -353,13 +353,13 @@ class HashServiceImplTest {
     @Mock private ICryptographicProvider cryptoProvider;
     @Mock private IInputValidator validator;
     @InjectMocks private HashServiceImpl hashService;
-    
+
     @Test
     @DisplayName("Should compute hash successfully with valid input")
     void shouldComputeHashSuccessfully() {
         // Test successful hash computation
     }
-    
+
     @Test
     @DisplayName("Should reject insecure algorithms")
     void shouldRejectInsecureAlgorithms() {
@@ -371,13 +371,13 @@ class HashServiceImplTest {
 **Cryptographic Provider Tests**
 ```java
 class CryptographicProviderTest {
-    
+
     @Test
     @DisplayName("Should create MessageDigest for secure algorithms")
     void shouldCreateDigestForSecureAlgorithms() {
         // Test MessageDigest creation
     }
-    
+
     @Test
     @DisplayName("Should convert bytes to hex correctly")
     void shouldConvertBytesToHexCorrectly() {
@@ -392,9 +392,9 @@ class CryptographicProviderTest {
 ```java
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HashControllerIntegrationTest {
-    
+
     @Autowired private TestRestTemplate restTemplate;
-    
+
     @Test
     @DisplayName("Should return HTML response for browser requests")
     void shouldReturnHtmlResponseForBrowserRequests() {
@@ -406,13 +406,13 @@ class HashControllerIntegrationTest {
 **Security Testing**
 ```java
 class SecurityIntegrationTest {
-    
+
     @Test
     @DisplayName("Should reject deprecated algorithms")
     void shouldRejectDeprecatedAlgorithms() {
         // Test security policy enforcement
     }
-    
+
     @Test
     @DisplayName("Should not expose sensitive information in errors")
     void shouldNotExposeSensitiveInformationInErrors() {

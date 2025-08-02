@@ -6,8 +6,8 @@ This specification defines the requirements for implementing a secure checksum v
 ## User Stories
 
 ### Story 1: Business Public Key Distribution
-**As a** business distributing public keys to clients  
-**I want** to provide checksum verification for downloaded public keys  
+**As a** business distributing public keys to clients
+**I want** to provide checksum verification for downloaded public keys
 **So that** clients can verify file integrity and detect tampering
 
 #### Acceptance Criteria
@@ -16,8 +16,8 @@ This specification defines the requirements for implementing a secure checksum v
 - WHEN clients download the public key THE SYSTEM SHALL provide both the file and its corresponding checksum
 
 ### Story 2: Student Implementation Assignment
-**As a** CS305 student  
-**I want** to implement a working checksum verification system  
+**As a** CS305 student
+**I want** to implement a working checksum verification system
 **So that** I can demonstrate understanding of cryptographic hash functions and secure coding practices
 
 #### Acceptance Criteria
@@ -27,8 +27,8 @@ This specification defines the requirements for implementing a secure checksum v
 - WHEN accessed via web browser THE SYSTEM SHALL serve content over HTTPS on port 8443
 
 ### Story 3: Algorithm Selection and Security
-**As a** security-conscious developer  
-**I want** to select an appropriate cryptographic hash algorithm  
+**As a** security-conscious developer
+**I want** to select an appropriate cryptographic hash algorithm
 **So that** the system is resistant to collision attacks and meets current security standards
 
 #### Acceptance Criteria
@@ -38,8 +38,8 @@ This specification defines the requirements for implementing a secure checksum v
 - WHEN documenting the choice THE SYSTEM SHALL provide technical justification for the selected algorithm
 
 ### Story 4: RESTful Web Service
-**As a** client application  
-**I want** to access checksum verification via a RESTful endpoint  
+**As a** client application
+**I want** to access checksum verification via a RESTful endpoint
 **So that** I can integrate checksum verification into automated workflows
 
 #### Acceptance Criteria
@@ -50,8 +50,8 @@ This specification defines the requirements for implementing a secure checksum v
 - WHEN errors occur THE SYSTEM SHALL handle cryptographic exceptions gracefully
 
 ### Story 5: SSL/TLS Security
-**As a** security-conscious user  
-**I want** all communications to be encrypted  
+**As a** security-conscious user
+**I want** all communications to be encrypted
 **So that** data integrity is maintained during transmission
 
 #### Acceptance Criteria
@@ -61,8 +61,8 @@ This specification defines the requirements for implementing a secure checksum v
 - WHEN SSL errors occur THE SYSTEM SHALL provide appropriate error handling
 
 ### Story 6: Academic Submission Requirements
-**As a** CS305 instructor  
-**I want** to evaluate student understanding of cryptographic concepts  
+**As a** CS305 instructor
+**I want** to evaluate student understanding of cryptographic concepts
 **So that** I can assess learning objectives and provide appropriate feedback
 
 #### Acceptance Criteria
