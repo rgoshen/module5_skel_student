@@ -30,6 +30,7 @@ import com.snhu.sslserver.model.PerformanceRating;
 import com.snhu.sslserver.model.ValidationResult;
 import com.snhu.sslserver.service.IHashService;
 import com.snhu.sslserver.service.IInputValidator;
+import com.snhu.sslserver.util.ResponseFormatter;
 
 /**
  * Unit tests for HashController. Tests REST endpoint functionality, content negotiation, error
@@ -45,12 +46,14 @@ class HashControllerTest {
 
   @Mock private IInputValidator validator;
 
+  @Mock private ResponseFormatter responseFormatter;
+
   private MockMvc mockMvc;
   private HashController controller;
 
   @BeforeEach
   void setUp() {
-    controller = new HashController(hashService, validator);
+    controller = new HashController(hashService, validator, responseFormatter);
     mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
   }
 
@@ -71,6 +74,9 @@ class HashControllerTest {
     when(validator.validateAlgorithm("SHA-256")).thenReturn(validAlgorithm);
     when(validator.validateAndSanitize(anyString())).thenReturn(validInput);
     when(hashService.computeHash("Hello Rick Goshen!", "SHA-256")).thenReturn(hashResult);
+    when(responseFormatter.formatHashResultAsHtml(hashResult))
+        .thenReturn(
+            "<html><body>Hello Rick Goshen! SHA-256 a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3</body></html>");
 
     // Act & Assert
     mockMvc
@@ -274,6 +280,8 @@ class HashControllerTest {
                 .build());
 
     when(hashService.getSupportedAlgorithms()).thenReturn(algorithms);
+    when(responseFormatter.formatAlgorithmsAsHtml(algorithms))
+        .thenReturn("<html><body>SHA-256 Secure SHA-256 algorithm</body></html>");
 
     // Act & Assert
     mockMvc
@@ -320,6 +328,9 @@ class HashControllerTest {
     when(validator.validateAlgorithm("SHA-256")).thenReturn(validAlgorithm);
     when(validator.validateAndSanitize(anyString())).thenReturn(validInput);
     when(hashService.computeHash(anyString(), anyString())).thenReturn(hashResult);
+    when(responseFormatter.formatHashResultAsHtml(hashResult))
+        .thenReturn(
+            "<html><body>Hello &lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;</body></html>");
 
     // Act & Assert
     mockMvc
@@ -343,13 +354,16 @@ class HashControllerTest {
   void shouldHandleNullDependenciesGracefullyInConstructor() {
     // Act & Assert
     org.junit.jupiter.api.Assertions.assertThrows(
-        NullPointerException.class, () -> new HashController(null, validator));
+        NullPointerException.class, () -> new HashController(null, validator, responseFormatter));
 
     org.junit.jupiter.api.Assertions.assertThrows(
-        NullPointerException.class, () -> new HashController(hashService, null));
+        NullPointerException.class, () -> new HashController(hashService, null, responseFormatter));
 
     org.junit.jupiter.api.Assertions.assertThrows(
-        NullPointerException.class, () -> new HashController(null, null));
+        NullPointerException.class, () -> new HashController(hashService, validator, null));
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        NullPointerException.class, () -> new HashController(null, null, null));
   }
 
   @Test

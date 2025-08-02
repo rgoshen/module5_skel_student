@@ -23,6 +23,7 @@ import com.snhu.sslserver.model.HashResult;
 import com.snhu.sslserver.model.ValidationResult;
 import com.snhu.sslserver.service.IHashService;
 import com.snhu.sslserver.service.IInputValidator;
+import com.snhu.sslserver.util.ResponseFormatter;
 
 /**
  * REST controller for hash generation endpoints. This controller provides secure checksum
@@ -44,17 +45,22 @@ public class HashController {
 
   private final IHashService hashService;
   private final IInputValidator validator;
+  private final ResponseFormatter responseFormatter;
 
   /**
    * Constructs HashController with required dependencies.
    *
    * @param hashService Service for hash computation operations
    * @param validator Service for input validation and sanitization
+   * @param responseFormatter Service for HTML response formatting
    * @throws IllegalArgumentException if any dependency is null
    */
-  public HashController(IHashService hashService, IInputValidator validator) {
+  public HashController(
+      IHashService hashService, IInputValidator validator, ResponseFormatter responseFormatter) {
     this.hashService = Objects.requireNonNull(hashService, "Hash service cannot be null");
     this.validator = Objects.requireNonNull(validator, "Input validator cannot be null");
+    this.responseFormatter =
+        Objects.requireNonNull(responseFormatter, "Response formatter cannot be null");
   }
 
   /**
@@ -174,7 +180,9 @@ public class HashController {
           .contentType(MediaType.APPLICATION_JSON)
           .body(createJsonResponse(result));
     } else {
-      return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(createHtmlResponse(result));
+      return ResponseEntity.ok()
+          .contentType(MediaType.TEXT_HTML)
+          .body(responseFormatter.formatHashResultAsHtml(result));
     }
   }
 
@@ -194,7 +202,7 @@ public class HashController {
     } else {
       return ResponseEntity.ok()
           .contentType(MediaType.TEXT_HTML)
-          .body(createAlgorithmsHtmlResponse(algorithms));
+          .body(responseFormatter.formatAlgorithmsAsHtml(algorithms));
     }
   }
 
@@ -230,102 +238,6 @@ public class HashController {
       logger.debug("Error parsing Accept header '{}', defaulting to HTML", acceptHeader, e);
       return MediaType.TEXT_HTML;
     }
-  }
-
-  /**
-   * Creates an HTML response for hash results.
-   *
-   * @param result The hash computation result
-   * @return HTML formatted response string
-   */
-  private String createHtmlResponse(HashResult result) {
-    StringBuilder html = new StringBuilder();
-    html.append("<!DOCTYPE html>\n");
-    html.append("<html>\n");
-    html.append("<head>\n");
-    html.append("    <title>Checksum Verification Result</title>\n");
-    html.append("    <style>\n");
-    html.append("        body { font-family: Arial, sans-serif; margin: 40px; }\n");
-    html.append(
-        "        .result-container { background-color: #f5f5f5; padding: 20px; border-radius: 5px; }\n");
-    html.append("        .field { margin: 10px 0; }\n");
-    html.append("        .label { font-weight: bold; }\n");
-    html.append("        .hash { font-family: monospace; word-break: break-all; }\n");
-    html.append("    </style>\n");
-    html.append("</head>\n");
-    html.append("<body>\n");
-    html.append("    <h1>Checksum Verification System</h1>\n");
-    html.append("    <div class=\"result-container\">\n");
-    html.append("        <div class=\"field\">\n");
-    html.append("            <span class=\"label\">Original Data:</span> ");
-    html.append(escapeHtml(result.getOriginalData()));
-    html.append("\n        </div>\n");
-    html.append("        <div class=\"field\">\n");
-    html.append("            <span class=\"label\">Algorithm:</span> ");
-    html.append(escapeHtml(result.getAlgorithm()));
-    html.append("\n        </div>\n");
-    html.append("        <div class=\"field\">\n");
-    html.append("            <span class=\"label\">Hash Value:</span>\n");
-    html.append("            <div class=\"hash\">");
-    html.append(escapeHtml(result.getHexHash()));
-    html.append("</div>\n");
-    html.append("        </div>\n");
-    html.append("        <div class=\"field\">\n");
-    html.append("            <span class=\"label\">Computation Time:</span> ");
-    html.append(result.getComputationTimeMs());
-    html.append(" ms\n        </div>\n");
-    html.append("    </div>\n");
-    html.append("</body>\n");
-    html.append("</html>");
-    return html.toString();
-  }
-
-  /**
-   * Creates an HTML response for supported algorithms.
-   *
-   * @param algorithms List of supported algorithms
-   * @return HTML formatted response string
-   */
-  private String createAlgorithmsHtmlResponse(List<AlgorithmInfo> algorithms) {
-    StringBuilder html = new StringBuilder();
-    html.append("<!DOCTYPE html>\n");
-    html.append("<html>\n");
-    html.append("<head>\n");
-    html.append("    <title>Supported Algorithms</title>\n");
-    html.append("    <style>\n");
-    html.append("        body { font-family: Arial, sans-serif; margin: 40px; }\n");
-    html.append(
-        "        .algorithm { background-color: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }\n");
-    html.append("        .secure { border-left: 4px solid #4CAF50; }\n");
-    html.append("        .insecure { border-left: 4px solid #f44336; }\n");
-    html.append("        .name { font-weight: bold; font-size: 1.2em; }\n");
-    html.append("    </style>\n");
-    html.append("</head>\n");
-    html.append("<body>\n");
-    html.append("    <h1>Supported Hash Algorithms</h1>\n");
-
-    for (AlgorithmInfo algorithm : algorithms) {
-      html.append("    <div class=\"algorithm ");
-      html.append(algorithm.isSecure() ? "secure" : "insecure");
-      html.append("\">\n");
-      html.append("        <div class=\"name\">");
-      html.append(escapeHtml(algorithm.getName()));
-      html.append("</div>\n");
-      html.append("        <div>");
-      html.append(escapeHtml(algorithm.getDescription()));
-      html.append("</div>\n");
-      html.append("        <div><strong>Security:</strong> ");
-      html.append(algorithm.isSecure() ? "Secure" : "Deprecated");
-      html.append("</div>\n");
-      html.append("        <div><strong>Performance:</strong> ");
-      html.append(algorithm.getPerformance().toString());
-      html.append("</div>\n");
-      html.append("    </div>\n");
-    }
-
-    html.append("</body>\n");
-    html.append("</html>");
-    return html.toString();
   }
 
   /**
@@ -401,8 +313,7 @@ public class HashController {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
-        .replace("`", "&#x60;") // Backtick
-        .replace("=", "&#x3D;"); // Equals sign
+        .replace("`", "&#x60;"); // Backtick
   }
 
   /**
