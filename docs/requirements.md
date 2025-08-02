@@ -75,40 +75,87 @@ This specification defines the requirements for implementing a secure checksum v
 
 ### FR-1: Hash Generation
 - WHEN a hash is requested THE SYSTEM SHALL generate a cryptographic hash of the personalized data string
-- WHEN converting hash output THE SYSTEM SHALL convert byte arrays to hexadecimal representation
+- WHEN converting hash output THE SYSTEM SHALL convert byte arrays to hexadecimal representation using optimized algorithms
 - WHEN processing data THE SYSTEM SHALL use UTF-8 encoding for string to byte conversion
+- WHEN generating hashes THE SYSTEM SHALL implement proper resource management for cryptographic objects
 
 ### FR-2: Data Personalization
 - WHEN generating test data THE SYSTEM SHALL include the student's actual first and last name
-- WHEN formatting the data string THE SYSTEM SHALL use the format "FirstName LastName"
+- WHEN formatting the data string THE SYSTEM SHALL validate and sanitize input data
 - WHEN displaying data THE SYSTEM SHALL show the original input string alongside the hash
+- WHEN handling user input THE SYSTEM SHALL implement proper input validation patterns
 
 ### FR-3: Web Interface
-- WHEN serving content THE SYSTEM SHALL provide HTML-formatted responses
+- WHEN serving content THE SYSTEM SHALL provide HTML-formatted responses with proper escaping
 - WHEN displaying results THE SYSTEM SHALL show data, algorithm, and hash in a readable format
 - WHEN handling requests THE SYSTEM SHALL respond to GET requests on the /hash endpoint
+- WHEN processing requests THE SYSTEM SHALL implement proper HTTP status code handling
+
+### FR-4: Code Quality and Documentation
+- WHEN implementing methods THE SYSTEM SHALL include comprehensive Javadoc documentation
+- WHEN writing code THE SYSTEM SHALL follow consistent naming conventions and formatting
+- WHEN creating classes THE SYSTEM SHALL implement single responsibility principle
+- WHEN handling complex logic THE SYSTEM SHALL include inline comments explaining business logic
+
+### FR-5: Architecture and Design Patterns
+- WHEN organizing code THE SYSTEM SHALL implement separation of concerns through service layers
+- WHEN managing dependencies THE SYSTEM SHALL use dependency injection patterns
+- WHEN handling configuration THE SYSTEM SHALL externalize configuration properties
+- WHEN implementing services THE SYSTEM SHALL follow interface-based design patterns
 
 ## Non-Functional Requirements
 
-### NFR-1: Security
+### NFR-1: Security Best Practices
 - WHEN selecting algorithms THE SYSTEM SHALL use cryptographically secure, collision-resistant hash functions
-- WHEN handling errors THE SYSTEM SHALL not expose sensitive information in error messages
+- WHEN handling errors THE SYSTEM SHALL not expose sensitive information in error messages or stack traces
 - WHEN configuring SSL THE SYSTEM SHALL use strong cipher suites and protocols
+- WHEN validating input THE SYSTEM SHALL implement comprehensive input sanitization and validation
+- WHEN logging information THE SYSTEM SHALL not log sensitive data or cryptographic keys
+- WHEN handling exceptions THE SYSTEM SHALL implement secure error handling patterns
 
-### NFR-2: Performance
+### NFR-2: Code Readability and Maintainability
+- WHEN writing code THE SYSTEM SHALL follow consistent Java naming conventions (camelCase, PascalCase)
+- WHEN organizing classes THE SYSTEM SHALL implement logical package structure and file organization
+- WHEN implementing methods THE SYSTEM SHALL keep methods focused and under 20 lines when possible
+- WHEN using variables THE SYSTEM SHALL use descriptive, self-documenting names
+- WHEN formatting code THE SYSTEM SHALL maintain consistent indentation and spacing
+- WHEN creating complex logic THE SYSTEM SHALL break down into smaller, testable units
+
+### NFR-3: Documentation Standards
+- WHEN creating public methods THE SYSTEM SHALL include comprehensive Javadoc with @param, @return, @throws
+- WHEN implementing complex algorithms THE SYSTEM SHALL include inline comments explaining the logic
+- WHEN defining classes THE SYSTEM SHALL include class-level Javadoc describing purpose and usage
+- WHEN handling edge cases THE SYSTEM SHALL document assumptions and constraints
+- WHEN using external libraries THE SYSTEM SHALL document dependencies and their purposes
+
+### NFR-4: Architecture and Design Quality
+- WHEN designing services THE SYSTEM SHALL follow Single Responsibility Principle (SRP)
+- WHEN creating dependencies THE SYSTEM SHALL implement Dependency Inversion Principle (DIP)
+- WHEN extending functionality THE SYSTEM SHALL follow Open/Closed Principle (OCP)
+- WHEN designing interfaces THE SYSTEM SHALL follow Interface Segregation Principle (ISP)
+- WHEN implementing inheritance THE SYSTEM SHALL follow Liskov Substitution Principle (LSP)
+- WHEN writing code THE SYSTEM SHALL eliminate duplication following DRY principle
+
+### NFR-5: Performance and Optimization
 - WHEN generating hashes THE SYSTEM SHALL complete operations within reasonable time limits
 - WHEN serving requests THE SYSTEM SHALL handle concurrent connections efficiently
 - WHEN starting up THE SYSTEM SHALL initialize within 30 seconds
+- WHEN processing strings THE SYSTEM SHALL use efficient string handling and avoid unnecessary object creation
+- WHEN working with byte arrays THE SYSTEM SHALL implement memory-efficient operations
+- WHEN caching results THE SYSTEM SHALL implement appropriate caching strategies where beneficial
 
-### NFR-3: Maintainability
-- WHEN writing code THE SYSTEM SHALL follow secure coding practices and include appropriate comments
-- WHEN implementing features THE SYSTEM SHALL use clear, descriptive variable and method names
-- WHEN handling exceptions THE SYSTEM SHALL provide meaningful error messages for debugging
+### NFR-6: Error Handling and Resilience
+- WHEN encountering exceptions THE SYSTEM SHALL implement graceful degradation patterns
+- WHEN handling failures THE SYSTEM SHALL provide meaningful error messages for users
+- WHEN logging errors THE SYSTEM SHALL include sufficient context for debugging without exposing sensitive data
+- WHEN validating input THE SYSTEM SHALL provide clear feedback on validation failures
+- WHEN processing requests THE SYSTEM SHALL implement proper HTTP status code responses
 
-### NFR-4: Educational Value
-- WHEN implementing solutions THE SYSTEM SHALL demonstrate understanding of cryptographic principles
-- WHEN documenting choices THE SYSTEM SHALL provide clear technical rationale
-- WHEN presenting results THE SYSTEM SHALL show practical application of security concepts
+### NFR-7: Testing and Quality Assurance
+- WHEN implementing functionality THE SYSTEM SHALL be designed for unit testability
+- WHEN creating methods THE SYSTEM SHALL have clear, testable interfaces
+- WHEN handling edge cases THE SYSTEM SHALL include appropriate test coverage
+- WHEN implementing security features THE SYSTEM SHALL include security-focused test cases
 
 ## Constraints
 
