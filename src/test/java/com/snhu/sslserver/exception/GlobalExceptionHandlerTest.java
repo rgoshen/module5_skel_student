@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,21 +56,22 @@ class GlobalExceptionHandlerTest {
             .message("Cryptographic operation failed")
             .correlationId("test123")
             .build();
-    ResponseEntity<ErrorResponse> expectedResponse =
+    ResponseEntity<?> expectedResponse =
         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleCryptographicException(exception, acceptHeader))
-        .thenReturn(expectedResponse);
+    doReturn(expectedResponse)
+        .when(secureErrorHandler)
+        .handleCryptographicException(exception, acceptHeader);
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleCryptographicException(exception, webRequest);
 
     // Assert
     assertNotNull(response);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    assertEquals(errorResponse, response.getBody());
+    assertEquals(errorResponse, (ErrorResponse) response.getBody());
     verify(secureErrorHandler).handleCryptographicException(exception, acceptHeader);
   }
 
@@ -85,21 +87,22 @@ class GlobalExceptionHandlerTest {
             .message("Invalid request parameters")
             .correlationId("test456")
             .build();
-    ResponseEntity<ErrorResponse> expectedResponse =
+    ResponseEntity<?> expectedResponse =
         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleValidationException("Invalid input data", acceptHeader))
-        .thenReturn(expectedResponse);
+    doReturn(expectedResponse)
+        .when(secureErrorHandler)
+        .handleValidationException("Invalid input data", acceptHeader);
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleValidationException(exception, webRequest);
 
     // Assert
     assertNotNull(response);
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertEquals(errorResponse, response.getBody());
+    assertEquals(errorResponse, (ErrorResponse) response.getBody());
     verify(secureErrorHandler).handleValidationException("Invalid input data", acceptHeader);
   }
 
@@ -115,21 +118,22 @@ class GlobalExceptionHandlerTest {
             .message("Service temporarily unavailable")
             .correlationId("test789")
             .build();
-    ResponseEntity<ErrorResponse> expectedResponse =
+    ResponseEntity<?> expectedResponse =
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleServiceException(exception, acceptHeader))
-        .thenReturn(expectedResponse);
+    doReturn(expectedResponse)
+        .when(secureErrorHandler)
+        .handleServiceException(exception, acceptHeader);
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleServiceException(exception, webRequest);
 
     // Assert
     assertNotNull(response);
     assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
-    assertEquals(errorResponse, response.getBody());
+    assertEquals(errorResponse, (ErrorResponse) response.getBody());
     verify(secureErrorHandler).handleServiceException(exception, acceptHeader);
   }
 
@@ -145,21 +149,22 @@ class GlobalExceptionHandlerTest {
             .message("An error occurred while processing your request")
             .correlationId("test999")
             .build();
-    ResponseEntity<ErrorResponse> expectedResponse =
+    ResponseEntity<?> expectedResponse =
         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleGeneralException(exception, acceptHeader))
-        .thenReturn(expectedResponse);
+    doReturn(expectedResponse)
+        .when(secureErrorHandler)
+        .handleGeneralException(exception, acceptHeader);
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleGeneralException(exception, webRequest);
 
     // Assert
     assertNotNull(response);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    assertEquals(errorResponse, response.getBody());
+    assertEquals(errorResponse, (ErrorResponse) response.getBody());
     verify(secureErrorHandler).handleGeneralException(exception, acceptHeader);
   }
 
@@ -172,8 +177,9 @@ class GlobalExceptionHandlerTest {
     String acceptHeader = "application/json, text/html;q=0.9";
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleCryptographicException(any(), anyString()))
-        .thenReturn(ResponseEntity.ok().build());
+    doReturn(ResponseEntity.ok().build())
+        .when(secureErrorHandler)
+        .handleCryptographicException(any(), anyString());
 
     // Act
     globalExceptionHandler.handleCryptographicException(exception, webRequest);
@@ -190,8 +196,9 @@ class GlobalExceptionHandlerTest {
     RuntimeException exception = new RuntimeException("Test error");
 
     when(webRequest.getHeader("Accept")).thenReturn(null);
-    when(secureErrorHandler.handleGeneralException(any(), anyString()))
-        .thenReturn(ResponseEntity.ok().build());
+    doReturn(ResponseEntity.ok().build())
+        .when(secureErrorHandler)
+        .handleGeneralException(any(), anyString());
 
     // Act
     globalExceptionHandler.handleGeneralException(exception, webRequest);
@@ -207,8 +214,9 @@ class GlobalExceptionHandlerTest {
     IllegalArgumentException exception = new IllegalArgumentException("Validation failed");
 
     when(webRequest.getHeader("Accept")).thenReturn("");
-    when(secureErrorHandler.handleValidationException(anyString(), anyString()))
-        .thenReturn(ResponseEntity.ok().build());
+    doReturn(ResponseEntity.ok().build())
+        .when(secureErrorHandler)
+        .handleValidationException(anyString(), anyString());
 
     // Act
     globalExceptionHandler.handleValidationException(exception, webRequest);
@@ -230,15 +238,16 @@ class GlobalExceptionHandlerTest {
             .message("Service temporarily unavailable")
             .correlationId("timeout123")
             .build();
-    ResponseEntity<ErrorResponse> expectedResponse =
+    ResponseEntity<?> expectedResponse =
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleServiceException(exception, acceptHeader))
-        .thenReturn(expectedResponse);
+    doReturn(expectedResponse)
+        .when(secureErrorHandler)
+        .handleServiceException(exception, acceptHeader);
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleServiceException(exception, webRequest);
 
     // Assert
@@ -256,11 +265,12 @@ class GlobalExceptionHandlerTest {
     String acceptHeader = "text/html";
 
     when(webRequest.getHeader("Accept")).thenReturn(acceptHeader);
-    when(secureErrorHandler.handleServiceException(any(), anyString()))
-        .thenReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+    doReturn(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build())
+        .when(secureErrorHandler)
+        .handleServiceException(any(), anyString());
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         globalExceptionHandler.handleServiceException(exception, webRequest);
 
     // Assert

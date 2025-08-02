@@ -46,7 +46,7 @@ class SecureErrorHandlerTest {
         new CryptographicException(ErrorCode.ALGORITHM_NOT_SUPPORTED, "SHA-999 not found");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleCryptographicException(exception, "application/json");
 
     // Assert
@@ -54,11 +54,11 @@ class SecureErrorHandlerTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(500, errorResponse.getStatus());
     assertEquals("Cryptographic operation failed", errorResponse.getMessage());
     assertNotNull(errorResponse.getCorrelationId());
-    assertTrue(errorResponse.getCorrelationId().length() == 8); // UUID substring
+    assertTrue(errorResponse.getCorrelationId().length() == 20); // UUID substring (no dashes)
     assertNotNull(errorResponse.getTimestamp());
   }
 
@@ -71,11 +71,11 @@ class SecureErrorHandlerTest {
             ErrorCode.COMPUTATION_FAILED, "Internal crypto key compromised: key123456");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleCryptographicException(exception, "application/json");
 
     // Assert
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertNotNull(errorResponse);
 
     // Should not contain the actual exception message with sensitive information
@@ -91,7 +91,7 @@ class SecureErrorHandlerTest {
   @DisplayName("Should handle validation exceptions with appropriate error response")
   void shouldHandleValidationExceptionsWithAppropriateErrorResponse() {
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleValidationException(
             "Input contains SQL injection attempt", "application/json");
 
@@ -100,7 +100,7 @@ class SecureErrorHandlerTest {
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(400, errorResponse.getStatus());
     assertEquals("Invalid request parameters", errorResponse.getMessage());
     assertNotNull(errorResponse.getCorrelationId());
@@ -113,11 +113,11 @@ class SecureErrorHandlerTest {
     String maliciousInput = "'; DROP TABLE users; --";
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleValidationException(maliciousInput, "application/json");
 
     // Assert
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertNotNull(errorResponse);
 
     // Should not contain the malicious input
@@ -135,7 +135,7 @@ class SecureErrorHandlerTest {
     RuntimeException exception = new RuntimeException("Database connection string: user:pass@host");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleGeneralException(exception, "application/json");
 
     // Assert
@@ -143,7 +143,7 @@ class SecureErrorHandlerTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(500, errorResponse.getStatus());
     assertEquals("An error occurred while processing your request", errorResponse.getMessage());
     assertNotNull(errorResponse.getCorrelationId());
@@ -160,7 +160,7 @@ class SecureErrorHandlerTest {
     Exception exception = new java.net.ConnectException("Connection refused to internal service");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleServiceException(exception, "application/json");
 
     // Assert
@@ -168,7 +168,7 @@ class SecureErrorHandlerTest {
     assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertEquals(503, errorResponse.getStatus());
     assertEquals("Service temporarily unavailable", errorResponse.getMessage());
     assertNotNull(errorResponse.getCorrelationId());
@@ -182,14 +182,14 @@ class SecureErrorHandlerTest {
     Exception exception2 = new RuntimeException("Error 2");
 
     // Act
-    ResponseEntity<ErrorResponse> response1 =
+    ResponseEntity<?> response1 =
         secureErrorHandler.handleGeneralException(exception1, "application/json");
-    ResponseEntity<ErrorResponse> response2 =
+    ResponseEntity<?> response2 =
         secureErrorHandler.handleGeneralException(exception2, "application/json");
 
     // Assert
-    String correlationId1 = response1.getBody().getCorrelationId();
-    String correlationId2 = response2.getBody().getCorrelationId();
+    String correlationId1 = ((ErrorResponse) response1.getBody()).getCorrelationId();
+    String correlationId2 = ((ErrorResponse) response2.getBody()).getCorrelationId();
 
     assertNotNull(correlationId1);
     assertNotNull(correlationId2);
@@ -282,12 +282,12 @@ class SecureErrorHandlerTest {
     Exception exception = new RuntimeException("Test error");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
+    ResponseEntity<?> response =
         secureErrorHandler.handleGeneralException(exception, "application/json");
 
     // Assert
     Instant afterTest = Instant.now().plus(1, ChronoUnit.SECONDS);
-    ErrorResponse errorResponse = response.getBody();
+    ErrorResponse errorResponse = (ErrorResponse) response.getBody();
     assertNotNull(errorResponse.getTimestamp());
     assertTrue(errorResponse.getTimestamp().isAfter(beforeTest));
     assertTrue(errorResponse.getTimestamp().isBefore(afterTest));
@@ -300,8 +300,7 @@ class SecureErrorHandlerTest {
     Exception exception = new RuntimeException("Test error");
 
     // Act
-    ResponseEntity<ErrorResponse> response =
-        secureErrorHandler.handleGeneralException(exception, null);
+    ResponseEntity<?> response = secureErrorHandler.handleGeneralException(exception, null);
 
     // Assert
     assertNotNull(response);

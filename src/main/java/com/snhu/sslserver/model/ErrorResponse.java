@@ -132,7 +132,7 @@ public class ErrorResponse {
     private int status;
     private String message;
     private String correlationId;
-    private Instant timestamp = Instant.now();
+    private Instant timestamp;
 
     public Builder status(int status) {
       this.status = status;
@@ -155,6 +155,9 @@ public class ErrorResponse {
     }
 
     public ErrorResponse build() {
+      if (this.timestamp == null) {
+        this.timestamp = Instant.now();
+      }
       return new ErrorResponse(status, message, correlationId, timestamp);
     }
   }

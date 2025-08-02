@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import com.snhu.sslserver.model.ErrorResponse;
 import com.snhu.sslserver.util.SecureErrorHandler;
 
 /**
@@ -49,7 +48,7 @@ public class GlobalExceptionHandler {
    * @return Secure error response with correlation ID
    */
   @ExceptionHandler(CryptographicException.class)
-  public ResponseEntity<ErrorResponse> handleCryptographicException(
+  public ResponseEntity<?> handleCryptographicException(
       CryptographicException exception, WebRequest request) {
     String acceptHeader = extractAcceptHeader(request);
     return secureErrorHandler.handleCryptographicException(exception, acceptHeader);
@@ -63,7 +62,7 @@ public class GlobalExceptionHandler {
    * @return Validation error response with correlation ID
    */
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ErrorResponse> handleValidationException(
+  public ResponseEntity<?> handleValidationException(
       IllegalArgumentException exception, WebRequest request) {
     String acceptHeader = extractAcceptHeader(request);
     return secureErrorHandler.handleValidationException(exception.getMessage(), acceptHeader);
@@ -81,8 +80,7 @@ public class GlobalExceptionHandler {
     java.util.concurrent.TimeoutException.class,
     org.springframework.dao.DataAccessException.class
   })
-  public ResponseEntity<ErrorResponse> handleServiceException(
-      Exception exception, WebRequest request) {
+  public ResponseEntity<?> handleServiceException(Exception exception, WebRequest request) {
     String acceptHeader = extractAcceptHeader(request);
     return secureErrorHandler.handleServiceException(exception, acceptHeader);
   }
@@ -95,8 +93,7 @@ public class GlobalExceptionHandler {
    * @return Generic error response with correlation ID
    */
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleGeneralException(
-      Exception exception, WebRequest request) {
+  public ResponseEntity<?> handleGeneralException(Exception exception, WebRequest request) {
     String acceptHeader = extractAcceptHeader(request);
     return secureErrorHandler.handleGeneralException(exception, acceptHeader);
   }

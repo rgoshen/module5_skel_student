@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class SecureErrorHandler {
    * @param acceptHeader Accept header for content negotiation
    * @return Secure error response with correlation ID
    */
-  public ResponseEntity<ErrorResponse> handleCryptographicException(
+  public ResponseEntity<?> handleCryptographicException(
       CryptographicException exception, String acceptHeader) {
     String correlationId = generateCorrelationId();
 
@@ -68,7 +69,7 @@ public class SecureErrorHandler {
             .correlationId(correlationId)
             .build();
 
-    return createErrorResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    return createErrorResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, acceptHeader);
   }
 
   /**
@@ -78,8 +79,7 @@ public class SecureErrorHandler {
    * @param acceptHeader Accept header for content negotiation
    * @return Validation error response with correlation ID
    */
-  public ResponseEntity<ErrorResponse> handleValidationException(
-      String message, String acceptHeader) {
+  public ResponseEntity<?> handleValidationException(String message, String acceptHeader) {
     String correlationId = generateCorrelationId();
 
     // Log validation error without exposing user input
@@ -92,7 +92,7 @@ public class SecureErrorHandler {
             .correlationId(correlationId)
             .build();
 
-    return createErrorResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
+    return createErrorResponseEntity(errorResponse, HttpStatus.BAD_REQUEST, acceptHeader);
   }
 
   /**
@@ -102,8 +102,7 @@ public class SecureErrorHandler {
    * @param acceptHeader Accept header for content negotiation
    * @return Generic error response with correlation ID
    */
-  public ResponseEntity<ErrorResponse> handleGeneralException(
-      Exception exception, String acceptHeader) {
+  public ResponseEntity<?> handleGeneralException(Exception exception, String acceptHeader) {
     String correlationId = generateCorrelationId();
 
     // Log with correlation ID but don't expose exception details
@@ -121,7 +120,7 @@ public class SecureErrorHandler {
             .correlationId(correlationId)
             .build();
 
-    return createErrorResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    return createErrorResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, acceptHeader);
   }
 
   /**
@@ -131,8 +130,7 @@ public class SecureErrorHandler {
    * @param acceptHeader Accept header for content negotiation
    * @return Service error response with correlation ID
    */
-  public ResponseEntity<ErrorResponse> handleServiceException(
-      Exception exception, String acceptHeader) {
+  public ResponseEntity<?> handleServiceException(Exception exception, String acceptHeader) {
     String correlationId = generateCorrelationId();
 
     logSecurely("Service temporarily unavailable", correlationId, exception);
@@ -144,7 +142,7 @@ public class SecureErrorHandler {
             .correlationId(correlationId)
             .build();
 
-    return createErrorResponseEntity(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    return createErrorResponseEntity(errorResponse, HttpStatus.SERVICE_UNAVAILABLE, acceptHeader);
   }
 
   /**
@@ -212,7 +210,8 @@ public class SecureErrorHandler {
    * @return Unique correlation ID
    */
   private String generateCorrelationId() {
-    return UUID.randomUUID().toString().substring(0, 8);
+    // Use a longer substring of the UUID to reduce collision risk
+    return UUID.randomUUID().toString().replace("-", "").substring(0, 20);
   }
 
   /**
@@ -248,17 +247,29 @@ public class SecureErrorHandler {
   }
 
   /**
-   * Creates a ResponseEntity with appropriate content type based on accept header.
+   * Creates a ResponseEntity with proper error response format based on content negotiation.
    *
    * @param errorResponse Error response data
    * @param status HTTP status code
+   * @param acceptHeader Accept header for content negotiation
    * @return ResponseEntity with proper content type
    */
-  private ResponseEntity<ErrorResponse> createErrorResponseEntity(
-      ErrorResponse errorResponse, HttpStatus status) {
-    return ResponseEntity.status(status)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(errorResponse);
+  private ResponseEntity<?> createErrorResponseEntity(
+      ErrorResponse errorResponse, HttpStatus status, String acceptHeader) {
+
+    // Add correlation ID to response header for client log correlation
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("X-Correlation-ID", errorResponse.getCorrelationId());
+
+    // Determine response format based on Accept header
+    if (acceptHeader != null && acceptHeader.contains("text/html")) {
+      String htmlResponse = createSecureHtmlErrorResponse(errorResponse, status);
+      headers.setContentType(MediaType.TEXT_HTML);
+      return ResponseEntity.status(status).headers(headers).body(htmlResponse);
+    } else {
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      return ResponseEntity.status(status).headers(headers).body(errorResponse);
+    }
   }
 
   /**
