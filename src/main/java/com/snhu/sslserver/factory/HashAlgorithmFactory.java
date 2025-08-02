@@ -60,7 +60,7 @@ public class HashAlgorithmFactory {
       throw new IllegalArgumentException(
           String.format(
               "Unsupported algorithm: %s. Supported algorithms: %s",
-              algorithmName, String.join(", ", strategies.keySet())));
+              algorithmName, String.join(", ", getSupportedAlgorithmNames())));
     }
 
     return strategy;
@@ -104,5 +104,18 @@ public class HashAlgorithmFactory {
    */
   public List<HashAlgorithmStrategy> getAllStrategies() {
     return Collections.unmodifiableList(new ArrayList<>(strategies.values()));
+  }
+
+  /**
+   * Gets the names of all supported algorithms.
+   *
+   * @return List of supported algorithm names
+   */
+  private List<String> getSupportedAlgorithmNames() {
+    List<String> algorithmNames = new ArrayList<>();
+    for (Map.Entry<String, HashAlgorithmStrategy> entry : strategies.entrySet()) {
+      algorithmNames.add(entry.getKey());
+    }
+    return algorithmNames;
   }
 }
