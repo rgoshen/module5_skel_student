@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.snhu.sslserver.exception.CryptographicException;
+import com.snhu.sslserver.exception.SslConfigurationException;
 import com.snhu.sslserver.model.ErrorResponse;
 
 /**
@@ -42,6 +43,7 @@ public class SecureErrorHandler {
   private static final String GENERIC_VALIDATION_ERROR = "Invalid request parameters";
   private static final String GENERIC_CRYPTO_ERROR = "Cryptographic operation failed";
   private static final String GENERIC_SERVICE_ERROR = "Service temporarily unavailable";
+  private static final String GENERIC_SSL_ERROR = "SSL configuration error";
 
   /**
    * Handles cryptographic exceptions with secure logging and appropriate error responses.
@@ -70,6 +72,41 @@ public class SecureErrorHandler {
             .build();
 
     return createErrorResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, acceptHeader);
+  }
+
+  /**
+   * Handles SSL configuration exceptions with secure logging and appropriate error responses.
+   *
+   * @param exception The SSL configuration exception to handle
+   * @param acceptHeader Accept header for content negotiation
+   * @return Secure SSL error response with correlation ID
+   */
+  public ResponseEntity<?> handleSslException(
+      SslConfigurationException exception, String acceptHeader) {
+    String correlationId = generateCorrelationId();
+
+    // Log with correlation ID and sanitized message - don't expose SSL details
+    logSecurely(
+        "SSL configuration error occurred",
+        correlationId,
+        exception,
+        "errorType",
+        exception.getErrorType().name());
+
+    // Use user-safe message from exception
+    String userMessage = exception.getUserMessage();
+    if (userMessage == null || userMessage.trim().isEmpty()) {
+      userMessage = GENERIC_SSL_ERROR;
+    }
+
+    ErrorResponse errorResponse =
+        ErrorResponse.builder()
+            .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+            .message(userMessage)
+            .correlationId(correlationId)
+            .build();
+
+    return createErrorResponseEntity(errorResponse, HttpStatus.SERVICE_UNAVAILABLE, acceptHeader);
   }
 
   /**

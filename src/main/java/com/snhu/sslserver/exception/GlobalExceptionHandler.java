@@ -86,6 +86,20 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handles SSL configuration exceptions with secure error responses.
+   *
+   * @param exception The SSL configuration exception
+   * @param request The web request for extracting Accept header
+   * @return SSL error response with correlation ID
+   */
+  @ExceptionHandler(SslConfigurationException.class)
+  public ResponseEntity<?> handleSslConfigurationException(
+      SslConfigurationException exception, WebRequest request) {
+    String acceptHeader = extractAcceptHeader(request);
+    return secureErrorHandler.handleSslException(exception, acceptHeader);
+  }
+
+  /**
    * Handles all other unexpected exceptions with secure error responses.
    *
    * @param exception The general exception
