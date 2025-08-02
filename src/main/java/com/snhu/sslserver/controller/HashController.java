@@ -9,13 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
 
 import com.snhu.sslserver.exception.CryptographicException;
 import com.snhu.sslserver.model.AlgorithmInfo;
@@ -314,41 +312,6 @@ public class HashController {
         .replace("\"", "&quot;")
         .replace("'", "&#x27;")
         .replace("`", "&#x60;"); // Backtick
-  }
-
-  /**
-   * Global exception handler for CryptographicException.
-   *
-   * @param e The cryptographic exception
-   * @param request The web request to extract Accept header
-   * @return Error response
-   */
-  @ExceptionHandler(CryptographicException.class)
-  public ResponseEntity<?> handleCryptographicException(
-      CryptographicException e, WebRequest request) {
-    logger.warn("Cryptographic exception: {}", e.getUserMessage(), e);
-    String acceptHeader = request.getHeader("Accept");
-    return createErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        e.getUserMessage(),
-        acceptHeader != null ? acceptHeader : "text/html");
-  }
-
-  /**
-   * Global exception handler for general exceptions.
-   *
-   * @param e The exception
-   * @param request The web request to extract Accept header
-   * @return Error response
-   */
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<?> handleGeneralException(Exception e, WebRequest request) {
-    logger.error("Unhandled exception caught in HashController", e);
-    String acceptHeader = request.getHeader("Accept");
-    return createErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "An unexpected error occurred",
-        acceptHeader != null ? acceptHeader : "text/html");
   }
 
   /** DTO for JSON hash responses. */
