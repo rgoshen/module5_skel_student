@@ -40,7 +40,7 @@
   - Write comprehensive unit tests for hash service functionality
   - _Requirements: 1.1, 1.2, 2.1, 2.3, 3.1, 3.2_
 
-- [ ] 6. Implement REST controller with content negotiation
+- [x] 6. Implement REST controller with content negotiation
   - Create HashController class with proper Spring annotations
   - Implement /hash GET endpoint that accepts algorithm parameter
   - Implement content negotiation for HTML and JSON responses
