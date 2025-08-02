@@ -136,11 +136,11 @@ public class SecurityValidator {
         "SHA-256", "SHA-384", "SHA-512",
         "SHA-3-256", "SHA-3-384", "SHA-3-512"
     );
-    
+
     private static final Set<String> DEPRECATED_ALGORITHMS = Set.of(
         "MD5", "SHA-1"
     );
-    
+
     public boolean isAlgorithmSecure(String algorithm) {
         if (DEPRECATED_ALGORITHMS.contains(algorithm.toUpperCase())) {
             throw new SecurityException("Deprecated algorithm not allowed: " + algorithm);
@@ -165,16 +165,16 @@ public class SecurityValidator {
 public class InputValidator {
     private static final int MAX_INPUT_LENGTH = 10000;
     private static final Pattern SAFE_INPUT_PATTERN = Pattern.compile("^[\\w\\s\\-\\.@]+$");
-    
+
     public ValidationResult validateInput(String input) {
         if (input == null || input.trim().isEmpty()) {
             return ValidationResult.failure("Input cannot be empty");
         }
-        
+
         if (input.length() > MAX_INPUT_LENGTH) {
             return ValidationResult.failure("Input exceeds maximum length");
         }
-        
+
         String sanitized = input.trim().replaceAll("[<>\"'&]", "");
         return ValidationResult.success(sanitized);
     }
@@ -197,17 +197,17 @@ public class SecureErrorHandler {
     public ResponseEntity<ErrorResponse> handleCryptographicException(CryptographicException e) {
         // Generate correlation ID for debugging
         String errorId = UUID.randomUUID().toString();
-        
+
         // Log detailed error server-side only
         log.error("Cryptographic operation failed [{}]: {}", errorId, e.getMessage(), e);
-        
+
         // Return generic error to client
         ErrorResponse response = ErrorResponse.builder()
             .errorId(errorId)
             .message("Hash computation failed. Please check your input and try again.")
             .timestamp(Instant.now())
             .build();
-            
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
@@ -298,17 +298,17 @@ server.ssl.ciphers=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_
 ```java
 /**
  * Computes cryptographic hash for given input using specified algorithm.
- * 
+ *
  * This method validates the input and algorithm, then delegates to the
  * cryptographic provider for actual hash computation. The result includes
  * metadata about the operation for audit and verification purposes.
- * 
+ *
  * @param input The data string to hash, including student name and additional data
  * @param algorithm The hash algorithm name (must be from approved secure list)
  * @return HashResult containing original data, algorithm used, and hex hash value
  * @throws CryptographicException if algorithm is insecure or computation fails
  * @throws IllegalArgumentException if input validation fails
- * 
+ *
  * @see CryptographicProvider#createDigest(String)
  * @see SecurityValidator#isAlgorithmSecure(String)
  * @since 1.0
@@ -336,7 +336,7 @@ public HashResult computeHash(String input, String algorithm) throws Cryptograph
 @Test void shouldValidateInputSafely() { }
 @Test void shouldHandleCryptographicErrors() { }
 
-// Integration Test Categories  
+// Integration Test Categories
 @Test void shouldReturnHtmlResponseForBrowserRequest() { }
 @Test void shouldReturnJsonResponseForApiRequest() { }
 @Test void shouldEnforceHttpsOnlyAccess() { }
@@ -437,7 +437,7 @@ public class HashController {
 
 #### Assessment Standards
 - Functional requirements: 40% of grade
-- Security implementation: 30% of grade  
+- Security implementation: 30% of grade
 - Code quality and documentation: 20% of grade
 - Academic presentation: 10% of grade
 

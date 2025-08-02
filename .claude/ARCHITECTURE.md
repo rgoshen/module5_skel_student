@@ -297,7 +297,7 @@ public class MessageDigestFactory {
         if (!SECURE_ALGORITHMS.contains(algorithm)) {
             throw new CryptographicException("Algorithm not secure: " + algorithm);
         }
-        
+
         try {
             return MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
@@ -324,7 +324,7 @@ public abstract class AbstractHashProcessor {
     protected abstract String validateAndSanitize(String input);
     protected abstract String validateAlgorithm(String algorithm);
     protected abstract byte[] computeHashBytes(String input, String algorithm);
-    
+
     // Common implementations
     protected String bytesToHex(byte[] bytes) { /* implementation */ }
     protected ProcessedHashResult createResult(String input, String algorithm, String hash) { /* implementation */ }
@@ -454,7 +454,7 @@ class HashServiceImplTest {
         // Given
         String input = "test data";
         String algorithm = "SHA-256";
-        
+
         // When & Then
         // Test implementation
     }

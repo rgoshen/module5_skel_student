@@ -34,7 +34,7 @@
 ```bash
 # Examples:
 "What still needs to be implemented?"                    # → PROJECT_STATUS.md
-"What should I work on next?"                           # → PROJECT_STATUS.md  
+"What should I work on next?"                           # → PROJECT_STATUS.md
 "Has the HTML formatting been completed?"               # → PROJECT_STATUS.md
 "What are the current priorities?"                      # → PROJECT_STATUS.md
 ```

@@ -153,10 +153,10 @@ server.ssl.key-store-type=PKCS12
 
 ### Primary Endpoint
 **GET** `/api/v1/hash`
-- **Query Parameters**: 
+- **Query Parameters**:
   - `algorithm` (optional) - Hash algorithm to use (default: SHA-256)
   - `data` (optional) - Additional data to include in hash
-- **Content Negotiation**: 
+- **Content Negotiation**:
   - `Accept: text/html` → HTML response for browsers
   - `Accept: application/json` → JSON response for APIs
 
@@ -213,7 +213,7 @@ public class NewAlgorithmStrategy implements HashAlgorithmStrategy {
     public byte[] computeHash(String input) throws CryptographicException {
         // Implementation
     }
-    
+
     @Override
     public boolean isSecure() {
         return true; // Only if cryptographically secure
@@ -249,7 +249,7 @@ try {
 # Server Configuration
 server.port=8443
 
-# SSL Configuration  
+# SSL Configuration
 server.ssl.key-alias=tomcat
 server.ssl.key-store-password=snhu4321
 server.ssl.key-store=classpath:keystore.p12
@@ -310,7 +310,7 @@ kill -9 <PID>
 
 ### Related Documentation
 - `ARCHITECTURE.md` - Detailed design and architectural decisions
-- `REQUIREMENTS.md` - Complete requirements specification  
+- `REQUIREMENTS.md` - Complete requirements specification
 - `DEVELOPMENT.md` - Extended development workflows and setup
 - `SECURITY.md` - Comprehensive security guidelines and cryptographic details
 
@@ -333,7 +333,7 @@ kill -9 <PID>
 - SSL/TLS encryption
 - Student name integration
 
-**Security Requirements**: ✅  
+**Security Requirements**: ✅
 - Collision-resistant algorithms only
 - Input validation and sanitization
 - Secure error handling

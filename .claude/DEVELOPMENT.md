@@ -328,12 +328,12 @@ echo -n "test input" | xxd -p  # Check hex encoding
 @Slf4j
 public class HashServiceImpl {
     public HashResult computeHash(String input, String algorithm) {
-        log.debug("Computing hash for input length: {}, algorithm: {}", 
+        log.debug("Computing hash for input length: {}, algorithm: {}",
                  input.length(), algorithm);
-        
+
         // Add breakpoint here for IDE debugging
         MessageDigest digest = cryptoProvider.createDigest(algorithm);
-        
+
         log.debug("Successfully created digest instance for: {}", algorithm);
         return result;
     }

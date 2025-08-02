@@ -23,7 +23,7 @@ https://localhost:8443/api/v1/hash
 For detailed guidance, see the comprehensive documentation in `.claude/`:
 
 - **[📖 CLAUDE.md](.claude/CLAUDE.md)** - Complete development guide with commands, architecture, and troubleshooting
-- **[🏗️ ARCHITECTURE.md](.claude/ARCHITECTURE.md)** - Design patterns, interfaces, and component relationships  
+- **[🏗️ ARCHITECTURE.md](.claude/ARCHITECTURE.md)** - Design patterns, interfaces, and component relationships
 - **[📋 REQUIREMENTS.md](.claude/REQUIREMENTS.md)** - Business requirements, security specs, and acceptance criteria
 - **[⚙️ DEVELOPMENT.md](.claude/DEVELOPMENT.md)** - Setup, workflows, debugging, and CI/CD integration
 - **[🔐 SECURITY.md](.claude/SECURITY.md)** - Cryptographic guidelines, validation patterns, and compliance

@@ -80,17 +80,17 @@ String hexHash = bytesToHex(hashBytes); // 64 hex characters (32 bytes)
 ```java
 @Component
 public class CryptographicSecurityValidator {
-    
+
     // Secure algorithms with collision resistance >= 128 bits
     private static final Set<String> SECURE_ALGORITHMS = Set.of(
         "SHA-256",    // NIST FIPS 180-4, 256-bit output, 128-bit security
-        "SHA-384",    // NIST FIPS 180-4, 384-bit output, 192-bit security  
+        "SHA-384",    // NIST FIPS 180-4, 384-bit output, 192-bit security
         "SHA-512",    // NIST FIPS 180-4, 512-bit output, 256-bit security
         "SHA3-256",   // NIST FIPS 202, 256-bit output, 128-bit security
         "SHA3-384",   // NIST FIPS 202, 384-bit output, 192-bit security
         "SHA3-512"    // NIST FIPS 202, 512-bit output, 256-bit security
     );
-    
+
     // Algorithms with known vulnerabilities
     private static final Set<String> VULNERABLE_ALGORITHMS = Set.of(
         "MD5",        // Collision attacks, rainbow tables
@@ -98,13 +98,13 @@ public class CryptographicSecurityValidator {
         "MD4",        // Multiple collision attacks
         "MD2"         // Weak design, multiple attacks
     );
-    
+
     // Weak algorithms not suitable for security
     private static final Set<String> WEAK_ALGORITHMS = Set.of(
         "CRC32",      // Not cryptographically secure
         "Adler32"     // Checksum, not hash function
     );
-    
+
     /**
      * Validates algorithm security and availability
      * @param algorithm Algorithm name to validate
@@ -113,19 +113,19 @@ public class CryptographicSecurityValidator {
      */
     public SecurityValidationResult validateAlgorithm(String algorithm) {
         String normalizedAlg = algorithm.toUpperCase().replace("-", "");
-        
+
         // Check for explicitly vulnerable algorithms
         if (VULNERABLE_ALGORITHMS.contains(normalizedAlg)) {
             throw new SecurityException(String.format(
                 "Algorithm '%s' is cryptographically broken and cannot be used", algorithm));
         }
-        
+
         // Check for weak non-cryptographic algorithms
         if (WEAK_ALGORITHMS.contains(normalizedAlg)) {
             throw new SecurityException(String.format(
                 "Algorithm '%s' is not a cryptographic hash function", algorithm));
         }
-        
+
         // Verify algorithm is in approved secure list
         if (!SECURE_ALGORITHMS.contains(normalizedAlg)) {
             return SecurityValidationResult.failure(
@@ -133,7 +133,7 @@ public class CryptographicSecurityValidator {
                 "Please use one of: " + String.join(", ", SECURE_ALGORITHMS)
             );
         }
-        
+
         // Test algorithm availability in current JVM
         try {
             MessageDigest.getInstance(algorithm);
@@ -152,13 +152,13 @@ public class CryptographicSecurityValidator {
 ```java
 @Component
 public class HashPerformanceBenchmark {
-    
+
     public enum PerformanceRating {
         FAST,     // > 100 MB/s
-        MEDIUM,   // 50-100 MB/s  
+        MEDIUM,   // 50-100 MB/s
         SLOW      // < 50 MB/s
     }
-    
+
     // Approximate performance on modern hardware
     private static final Map<String, PerformanceRating> PERFORMANCE_MAP = Map.of(
         "SHA-256", PerformanceRating.FAST,    // ~150 MB/s
@@ -179,14 +179,14 @@ public class HashPerformanceBenchmark {
 ```java
 @Component
 public class SecurityInputValidator implements IInputValidator {
-    
+
     private static final int MAX_INPUT_LENGTH = 10000;
     private static final int MIN_INPUT_LENGTH = 1;
-    
+
     // Pattern for safe input characters (alphanumeric, spaces, common punctuation)
-    private static final Pattern SAFE_INPUT_PATTERN = 
+    private static final Pattern SAFE_INPUT_PATTERN =
         Pattern.compile("^[\\w\\s\\-\\.@#$%^&*()+={}\\[\\]:;\"'<>,./\\?|\\\\]+$");
-    
+
     // Dangerous patterns that could indicate injection attempts
     private static final Pattern[] INJECTION_PATTERNS = {
         Pattern.compile(".*<script.*?>.*</script>.*", Pattern.CASE_INSENSITIVE),
@@ -194,42 +194,42 @@ public class SecurityInputValidator implements IInputValidator {
         Pattern.compile(".*on\\w+\\s*=.*", Pattern.CASE_INSENSITIVE),
         Pattern.compile(".*\\b(union|select|insert|update|delete|drop)\\b.*", Pattern.CASE_INSENSITIVE)
     };
-    
+
     @Override
     public ValidationResult validateAndSanitize(String input) {
         if (input == null) {
             return ValidationResult.failure("Input cannot be null");
         }
-        
+
         // Trim whitespace
         String trimmed = input.trim();
-        
+
         // Check length constraints
         if (trimmed.length() < MIN_INPUT_LENGTH) {
             return ValidationResult.failure("Input cannot be empty");
         }
-        
+
         if (trimmed.length() > MAX_INPUT_LENGTH) {
             return ValidationResult.failure(
                 String.format("Input exceeds maximum length of %d characters", MAX_INPUT_LENGTH)
             );
         }
-        
+
         // Check for injection patterns
         for (Pattern pattern : INJECTION_PATTERNS) {
             if (pattern.matcher(trimmed).matches()) {
-                log.warn("Potential injection attempt detected: {}", 
+                log.warn("Potential injection attempt detected: {}",
                         trimmed.substring(0, Math.min(trimmed.length(), 50)));
                 return ValidationResult.failure("Input contains potentially dangerous content");
             }
         }
-        
+
         // Sanitize input (remove/escape dangerous characters)
         String sanitized = sanitizeInput(trimmed);
-        
+
         return ValidationResult.success(sanitized);
     }
-    
+
     private String sanitizeInput(String input) {
         return input
             .replaceAll("[<>\"'&]", "") // Remove HTML/XML characters
@@ -243,15 +243,15 @@ public class SecurityInputValidator implements IInputValidator {
 ```java
 @Component
 public class AlgorithmParameterValidator {
-    
+
     @Override
     public ValidationResult validateAlgorithm(String algorithm) {
         if (algorithm == null || algorithm.trim().isEmpty()) {
             return ValidationResult.success("SHA-256"); // Default to secure algorithm
         }
-        
+
         String normalizedAlgorithm = algorithm.trim().toUpperCase();
-        
+
         // Validate against known algorithm names
         if (!isValidAlgorithmName(normalizedAlgorithm)) {
             return ValidationResult.failure(
@@ -259,23 +259,23 @@ public class AlgorithmParameterValidator {
                 "Algorithm names must contain only letters, numbers, and hyphens"
             );
         }
-        
+
         // Security validation through CryptographicSecurityValidator
         try {
-            SecurityValidationResult securityResult = 
+            SecurityValidationResult securityResult =
                 cryptographicSecurityValidator.validateAlgorithm(normalizedAlgorithm);
-            
+
             if (!securityResult.isSecure()) {
                 return ValidationResult.failure(securityResult.getErrorMessage());
             }
-            
+
             return ValidationResult.success(normalizedAlgorithm);
-            
+
         } catch (SecurityException e) {
             return ValidationResult.failure(e.getMessage());
         }
     }
-    
+
     private boolean isValidAlgorithmName(String algorithm) {
         // Algorithm names should only contain alphanumeric characters and hyphens
         return algorithm.matches("^[A-Z0-9\\-]+$");
@@ -291,26 +291,26 @@ public class AlgorithmParameterValidator {
 ```java
 @Component
 public class SecureErrorHandler {
-    
+
     /**
      * Handles cryptographic exceptions without exposing sensitive information
      */
     @ExceptionHandler(CryptographicException.class)
     public ResponseEntity<ErrorResponse> handleCryptographicException(
             CryptographicException e, HttpServletRequest request) {
-        
+
         // Generate correlation ID for internal tracking
         String correlationId = generateCorrelationId();
-        
+
         // Log detailed error information server-side only
-        log.error("Cryptographic operation failed [{}] - Request: {} {}, User-Agent: {}, Exception: {}", 
+        log.error("Cryptographic operation failed [{}] - Request: {} {}, User-Agent: {}, Exception: {}",
                 correlationId,
                 request.getMethod(),
                 request.getRequestURI(),
                 request.getHeader("User-Agent"),
                 e.getMessage(),
                 e);
-        
+
         // Return generic error message to client
         ErrorResponse errorResponse = ErrorResponse.builder()
             .errorId(correlationId)
@@ -319,22 +319,22 @@ public class SecureErrorHandler {
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .path(request.getRequestURI())
             .build();
-        
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-    
+
     /**
      * Handles validation errors with user-friendly messages
      */
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
             ValidationException e, HttpServletRequest request) {
-        
+
         String correlationId = generateCorrelationId();
-        
+
         // Log validation errors (less sensitive than crypto errors)
         log.warn("Validation failed [{}] - {}", correlationId, e.getMessage());
-        
+
         ErrorResponse errorResponse = ErrorResponse.builder()
             .errorId(correlationId)
             .message(e.getMessage()) // Safe to expose validation messages
@@ -342,21 +342,21 @@ public class SecureErrorHandler {
             .status(HttpStatus.BAD_REQUEST.value())
             .path(request.getRequestURI())
             .build();
-        
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-    
+
     /**
      * Handles security violations with minimal information exposure
      */
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<ErrorResponse> handleSecurityException(
             SecurityException e, HttpServletRequest request) {
-        
+
         String correlationId = generateCorrelationId();
-        
+
         // Log security violations with high priority
-        log.error("Security violation detected [{}] - Request: {} {}, User-Agent: {}, Remote-Addr: {}, Exception: {}", 
+        log.error("Security violation detected [{}] - Request: {} {}, User-Agent: {}, Remote-Addr: {}, Exception: {}",
                 correlationId,
                 request.getMethod(),
                 request.getRequestURI(),
@@ -364,7 +364,7 @@ public class SecureErrorHandler {
                 request.getRemoteAddr(),
                 e.getMessage(),
                 e);
-        
+
         // Generic security error message
         ErrorResponse errorResponse = ErrorResponse.builder()
             .errorId(correlationId)
@@ -373,10 +373,10 @@ public class SecureErrorHandler {
             .status(HttpStatus.FORBIDDEN.value())
             .path(request.getRequestURI())
             .build();
-        
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
-    
+
     private String generateCorrelationId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
@@ -387,10 +387,10 @@ public class SecureErrorHandler {
 ```java
 @Component
 public class SecurityAwareLogger {
-    
+
     private final Logger securityLogger = LoggerFactory.getLogger("SECURITY");
     private final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
-    
+
     // Patterns for sensitive data that should not be logged
     private static final Pattern[] SENSITIVE_PATTERNS = {
         Pattern.compile(".*password.*", Pattern.CASE_INSENSITIVE),
@@ -398,46 +398,46 @@ public class SecurityAwareLogger {
         Pattern.compile(".*key.*", Pattern.CASE_INSENSITIVE),
         Pattern.compile(".*token.*", Pattern.CASE_INSENSITIVE)
     };
-    
+
     /**
      * Logs hash operations without exposing sensitive data
      */
     public void logHashOperation(String algorithm, int inputLength, boolean success) {
-        auditLogger.info("Hash operation - Algorithm: {}, Input length: {}, Success: {}", 
+        auditLogger.info("Hash operation - Algorithm: {}, Input length: {}, Success: {}",
                          algorithm, inputLength, success);
     }
-    
+
     /**
      * Logs security events with appropriate detail level
      */
     public void logSecurityEvent(String eventType, String details, String clientInfo) {
-        securityLogger.warn("Security event - Type: {}, Details: {}, Client: {}", 
+        securityLogger.warn("Security event - Type: {}, Details: {}, Client: {}",
                            eventType, sanitizeForLogging(details), clientInfo);
     }
-    
+
     /**
      * Sanitizes data before logging to prevent sensitive information exposure
      */
     private String sanitizeForLogging(String data) {
         if (data == null) return "null";
-        
+
         String sanitized = data;
-        
+
         // Check for sensitive patterns
         for (Pattern pattern : SENSITIVE_PATTERNS) {
             if (pattern.matcher(data).matches()) {
                 return "[REDACTED - Sensitive Data]";
             }
         }
-        
+
         // Limit length to prevent log injection
         if (sanitized.length() > 200) {
             sanitized = sanitized.substring(0, 200) + "...";
         }
-        
+
         // Remove potential log injection characters
         sanitized = sanitized.replaceAll("[\r\n\t]", " ");
-        
+
         return sanitized;
     }
 }
@@ -479,11 +479,11 @@ server.ssl.trust-store-password=${SSL_TRUST_STORE_PASSWORD:}
 @Configuration
 @EnableWebSecurity
 public class SecurityHeadersConfig {
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .requiresChannel(channel -> 
+            .requiresChannel(channel ->
                 channel.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
                        .requiresSecure())
             .headers(headers -> headers
@@ -498,11 +498,11 @@ public class SecurityHeadersConfig {
                 .addHeaderWriter(new StaticHeadersWriter("X-Frame-Options", "DENY"))
                 .addHeaderWriter(new StaticHeadersWriter("X-XSS-Protection", "1; mode=block"))
                 .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
-                .addHeaderWriter(new StaticHeadersWriter("Content-Security-Policy", 
+                .addHeaderWriter(new StaticHeadersWriter("Content-Security-Policy",
                     "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';")))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-                
+
         return http.build();
     }
 }
@@ -512,7 +512,7 @@ public class SecurityHeadersConfig {
 ```java
 @Component
 public class CertificateValidator {
-    
+
     /**
      * Validates SSL certificate chain and expiration
      */
@@ -520,28 +520,28 @@ public class CertificateValidator {
     public void validateCertificate() {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            
+
             try (InputStream keystoreStream = getClass().getClassLoader()
                     .getResourceAsStream("keystore.p12")) {
-                
+
                 keyStore.load(keystoreStream, "snhu4321".toCharArray());
-                
+
                 // Check certificate expiration
                 Certificate cert = keyStore.getCertificate("tomcat");
                 if (cert instanceof X509Certificate) {
                     X509Certificate x509 = (X509Certificate) cert;
-                    
+
                     Date notAfter = x509.getNotAfter();
                     Date now = new Date();
-                    
+
                     long daysUntilExpiration = (notAfter.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-                    
+
                     if (daysUntilExpiration < 30) {
                         log.warn("SSL certificate expires in {} days: {}", daysUntilExpiration, notAfter);
                     } else {
                         log.info("SSL certificate valid until: {}", notAfter);
                     }
-                    
+
                     // Verify certificate is self-signed (expected for development)
                     if (x509.getIssuerDN().equals(x509.getSubjectDN())) {
                         log.info("Using self-signed certificate for development");
@@ -564,36 +564,36 @@ public class CertificateValidator {
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(OrderAnnotation.class)
 public class SecurityPenetrationTest {
-    
+
     @Autowired
     private TestRestTemplate restTemplate;
-    
+
     @Test
     @Order(1)
     @DisplayName("Should reject deprecated MD5 algorithm")
     void shouldRejectMD5Algorithm() {
         ResponseEntity<String> response = restTemplate.getForEntity(
             "/api/v1/hash?algorithm=MD5", String.class);
-        
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).contains("security policy violations");
         assertThat(response.getBody()).doesNotContain("MD5"); // Should not expose algorithm name
     }
-    
+
     @Test
     @Order(2)
     @DisplayName("Should prevent XSS through input sanitization")
     void shouldPreventXSSAttacks() {
         String xssPayload = "<script>alert('xss')</script>";
-        
+
         ResponseEntity<String> response = restTemplate.getForEntity(
-            "/api/v1/hash?data=" + URLEncoder.encode(xssPayload, StandardCharsets.UTF_8), 
+            "/api/v1/hash?data=" + URLEncoder.encode(xssPayload, StandardCharsets.UTF_8),
             String.class);
-        
+
         assertThat(response.getBody()).doesNotContain("<script>");
         assertThat(response.getBody()).doesNotContain("alert");
     }
-    
+
     @Test
     @Order(3)
     @DisplayName("Should not expose sensitive information in error responses")
@@ -601,18 +601,18 @@ public class SecurityPenetrationTest {
         // Simulate internal error by using invalid keystore
         ResponseEntity<String> response = restTemplate.getForEntity(
             "/api/v1/hash?algorithm=INVALID_ALGORITHM", String.class);
-        
+
         String responseBody = response.getBody();
-        
+
         // Should not contain internal Java class names or stack traces
         assertThat(responseBody).doesNotContain("java.lang");
         assertThat(responseBody).doesNotContain("Exception");
         assertThat(responseBody).doesNotContain("at com.snhu");
-        
+
         // Should contain correlation ID for debugging
         assertThat(responseBody).matches(".*[a-f0-9]{12}.*");
     }
-    
+
     @Test
     @Order(4)
     @DisplayName("Should enforce HTTPS only")
@@ -630,36 +630,36 @@ public class SecurityPenetrationTest {
 ```java
 @ExtendWith(MockitoExtension.class)
 class CryptographicSecurityTest {
-    
+
     @InjectMocks
     private CryptographicSecurityValidator validator;
-    
+
     @ParameterizedTest
     @ValueSource(strings = {"MD5", "SHA-1", "MD4", "MD2"})
     @DisplayName("Should reject all known vulnerable algorithms")
     void shouldRejectVulnerableAlgorithms(String algorithm) {
-        SecurityException exception = assertThrows(SecurityException.class, 
+        SecurityException exception = assertThrows(SecurityException.class,
             () -> validator.validateAlgorithm(algorithm));
-        
+
         assertThat(exception.getMessage()).containsIgnoringCase("cryptographically broken");
     }
-    
+
     @ParameterizedTest
     @ValueSource(strings = {"SHA-256", "SHA-384", "SHA-512", "SHA3-256", "SHA3-384", "SHA3-512"})
     @DisplayName("Should accept all secure algorithms")
     void shouldAcceptSecureAlgorithms(String algorithm) {
         SecurityValidationResult result = validator.validateAlgorithm(algorithm);
-        
+
         assertThat(result.isSecure()).isTrue();
         assertThat(result.getAlgorithm()).isEqualTo(algorithm);
     }
-    
+
     @Test
     @DisplayName("Should detect collision resistance properties")
     void shouldValidateCollisionResistance() {
         // Test that secure algorithms provide appropriate collision resistance
         Set<String> hashes = new HashSet<>();
-        
+
         for (int i = 0; i < 1000; i++) {
             String input = "test-input-" + i;
             try {
@@ -683,7 +683,7 @@ class CryptographicSecurityTest {
 ```java
 @Component
 public class NISTComplianceValidator {
-    
+
     // NIST SP 800-107: Recommendation for Applications Using Approved Hash Algorithms
     private static final Map<String, NISTStatus> NIST_ALGORITHM_STATUS = Map.of(
         "SHA-256", NISTStatus.APPROVED,
@@ -695,30 +695,30 @@ public class NISTComplianceValidator {
         "MD5", NISTStatus.DEPRECATED,
         "SHA-1", NISTStatus.DEPRECATED
     );
-    
+
     public enum NISTStatus {
         APPROVED("Approved for use in Federal applications"),
         DEPRECATED("Deprecated, not recommended for new applications"),
         RESTRICTED("Restricted use only"),
         PROHIBITED("Prohibited for Federal use");
-        
+
         private final String description;
-        
+
         NISTStatus(String description) {
             this.description = description;
         }
     }
-    
+
     public ComplianceResult validateNISTCompliance(String algorithm) {
         NISTStatus status = NIST_ALGORITHM_STATUS.get(algorithm.toUpperCase());
-        
+
         if (status == null) {
             return ComplianceResult.unknown(algorithm, "Algorithm not evaluated by NIST");
         }
-        
+
         return switch (status) {
             case APPROVED -> ComplianceResult.compliant(algorithm, status.description);
-            case DEPRECATED, RESTRICTED, PROHIBITED -> 
+            case DEPRECATED, RESTRICTED, PROHIBITED ->
                 ComplianceResult.nonCompliant(algorithm, status.description);
         };
     }
@@ -729,52 +729,52 @@ public class NISTComplianceValidator {
 ```java
 @Component
 public class OWASPComplianceChecker {
-    
+
     /**
      * OWASP Top 10 2021 - A02:2021 – Cryptographic Failures
      * Validates cryptographic implementation against OWASP guidelines
      */
     public OWASPComplianceResult validateCryptographicImplementation() {
         List<String> findings = new ArrayList<>();
-        
+
         // Check 1: Strong algorithms only
         if (!isUsingStrongAlgorithms()) {
             findings.add("A02.1: Weak cryptographic algorithms detected");
         }
-        
+
         // Check 2: Proper key management
         if (!isKeyManagementSecure()) {
             findings.add("A02.2: Insecure key management practices");
         }
-        
+
         // Check 3: Data encryption in transit
         if (!isDataEncryptedInTransit()) {
             findings.add("A02.3: Data not properly encrypted in transit");
         }
-        
+
         // Check 4: No hardcoded cryptographic secrets
         if (hasHardcodedSecrets()) {
             findings.add("A02.4: Hardcoded cryptographic secrets detected");
         }
-        
+
         return new OWASPComplianceResult(findings.isEmpty(), findings);
     }
-    
+
     private boolean isUsingStrongAlgorithms() {
         // Verify only approved algorithms are configurable
         return true; // Implementation validates this
     }
-    
+
     private boolean isKeyManagementSecure() {
         // Check keystore configuration and access patterns
         return true; // Keystore properly configured
     }
-    
+
     private boolean isDataEncryptedInTransit() {
         // Verify HTTPS enforcement
         return true; // SSL/TLS properly configured
     }
-    
+
     private boolean hasHardcodedSecrets() {
         // Static analysis would be performed here
         // For now, verify no obvious hardcoded secrets in configuration
